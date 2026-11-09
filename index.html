@@ -112,6 +112,24 @@
   .entry { display:flex; justify-content:space-between; gap:10px; padding:11px 4px; border-top:1px solid var(--line); cursor:pointer; font-size:15px; }
   .entry:active { background:var(--blue-bg); }
   .neg { color:var(--green); }
+  .panel { background:var(--deep); color:#fff; border-radius:16px; padding:12px 14px 14px; margin:2px 0 12px; box-shadow:0 6px 18px rgba(8,72,74,.28); position:relative; }
+  .panel::before { content:''; position:absolute; top:-7px; right:40px; border:7px solid transparent; border-top:0; border-bottom-color:var(--deep); }
+  #avPick.panel::before { left:22px; right:auto; }
+  #cardPick.panel::before { right:150px; }
+  #gearMenu.panel::before { right:14px; }
+  .phead { display:flex; justify-content:space-between; align-items:center; font-size:15px; font-weight:600; margin-bottom:10px; }
+  .pclose { font-size:13px; font-weight:500; opacity:.85; cursor:pointer; padding:4px 2px; }
+  .plabel { font-size:12px; opacity:.8; margin:8px 0 6px; }
+  .panel .chip { background:rgba(255,255,255,.12); color:#fff; border-color:rgba(255,255,255,.35); }
+  .panel .chip.on { background:#f5c445; color:#3d2b00; border-color:#f5c445; }
+  .panel .grid2 .chip, .panel .grid3 .chip { min-height:44px; }
+  .panel .btn { background:rgba(255,255,255,.12); color:#fff; border-color:rgba(255,255,255,.35); }
+  .panel input.big, .panel input[type=date] { background:#fff; color:var(--ink); border-color:transparent; }
+  .panel .avgrid span { background:rgba(255,255,255,.9); border-color:transparent; }
+  .panel .avgrid span.on { background:#f5c445; }
+  .saverow { display:flex; gap:8px; }
+  .saverow .save { flex:1; margin-top:0; }
+  .clearbtn { flex:0 0 26%; min-height:54px; color:var(--muted); background:var(--card); }
   .sendchip { font-size:12px; color:var(--muted); background:var(--card); border:1px solid var(--line); border-radius:12px; padding:3px 9px; }
   .qerr { background:var(--red-bg); color:var(--red); border-radius:10px; padding:10px 12px; font-size:14px; margin:0 0 8px; }
   .qerr .row { display:flex; justify-content:space-between; align-items:center; gap:8px; padding:4px 0; }
@@ -146,7 +164,8 @@
     <div class="cols"><div class="colL">
     <div class="title"><b>Yiddishe Gelt</b><span style="display:flex;align-items:center;gap:6px;"><span id="sendChip" class="sendchip hide"></span><span class="gear" id="gearBtn" aria-label="Settings">⚙︎</span></span></div>
     <div id="qErr" class="qerr hide"></div>
-    <div id="gearMenu" class="hide box" style="margin-bottom:8px;">
+    <div id="gearMenu" class="hide panel">
+      <div class="phead"><span>Settings</span><span class="pclose" data-close="gearMenu">✕ Close</span></div>
       <div class="grid2">
         <span class="chip" id="entriesBtn">My entries</span>
         <span class="chip" id="editEvents">My events</span>
@@ -158,7 +177,8 @@
       <span style="display:flex;align-items:center;gap:8px;"><span class="av" id="avBtn" aria-label="Change your picture"></span><span id="who"></span></span>
       <span><span class="chip small" id="cardChip"></span><span class="chip small" id="dateChip">Today</span></span>
     </div>
-    <div id="avPick" class="hide box" style="margin-bottom:8px;">
+    <div id="avPick" class="hide panel">
+      <div class="phead"><span>Your picture</span><span class="pclose" data-close="avPick">✕ Close</span></div>
       <div class="avgrid" id="avGrid"></div>
       <div class="row2" style="margin-top:8px;">
         <div class="btn" id="avUpload">📷 Use a photo</div>
@@ -166,8 +186,19 @@
       </div>
       <input type="file" id="avFile" accept="image/*" class="hide">
     </div>
-    <div id="cardPick" class="hide grid3" style="margin-bottom:8px;"></div>
-    <div id="datePick" class="hide box" style="margin-bottom:6px;">
+    <div id="cardPick" class="hide panel">
+      <div class="phead"><span>Paid with</span><span class="pclose" data-close="cardPick">✕ Close</span></div>
+      <div class="plabel">Card (last 4 digits)</div>
+      <div class="grid3" id="cardGrid"></div>
+      <div class="plabel">Not a card</div>
+      <div class="grid3" id="methodGrid"></div>
+      <div style="display:flex;gap:8px;margin-top:10px;">
+        <input type="text" id="cardOther" class="big" placeholder="Other: last 4 digits or a word" autocomplete="off" style="height:46px;">
+        <div class="btn" id="cardOtherGo" style="flex:0 0 70px;min-height:46px;">Use</div>
+      </div>
+    </div>
+    <div id="datePick" class="hide panel">
+      <div class="phead"><span>Date of purchase</span><span class="pclose" data-close="datePick">✕ Close</span></div>
       <div class="grid3"><span class="chip" data-days="0">Today</span><span class="chip" data-days="1">Yesterday</span><span class="chip" data-days="2">2 days ago</span></div>
       <input type="date" id="dateInput" style="margin-top:8px;min-height:48px;">
     </div>
@@ -202,12 +233,12 @@
       <div class="btn dash" id="scanBtn">📷 Scan receipt</div>
       <div class="btn dash" id="photoBtn">Attach receipt</div>
     </div>
-    <input type="file" id="scanFile" accept="image/*" class="hide">
+    <input type="file" id="scanFile" accept="image/*" capture="environment" class="hide">
     <input type="file" id="photoFile" accept="image/*,application/pdf" class="hide">
 
     <div class="savebar">
       <div id="err" class="err"></div>
-      <button class="save" id="saveBtn">Save</button>
+      <div class="saverow"><button class="btn clearbtn" id="clearBtn">Clear</button><button class="save" id="saveBtn">Save</button></div>
       <div class="desk-hint" style="text-align:center;margin-top:6px;">Press Enter to save · paste a screenshot to attach it</div>
     </div>
     </div></div>
@@ -437,7 +468,7 @@ function setAvatar(v) {
   D.user.avatar = v; avatarChangedHere = true; writeCache(D); renderAvatar(); $('avPick').classList.add('hide');
   google.script.run.saveMyAvatar(v);
 }
-$('avBtn').onclick = function () { $('avPick').classList.toggle('hide'); $('cardPick').classList.add('hide'); $('datePick').classList.add('hide'); };
+$('avBtn').onclick = function () { openPanel('avPick'); };
 $('avInitials').onclick = function () { setAvatar(''); };
 $('avUpload').onclick = function () { $('avFile').value = ''; $('avFile').click(); };
 $('avFile').onchange = function () {
@@ -453,18 +484,38 @@ $('avFile').onchange = function () {
 };
 
 /* ---------- card + date ---------- */
+var METHODS = ['Invoice', 'Check', 'PayPal', 'Cash'];
+function isCardNo(c) { return /^\d{3,4}$/.test(String(c)); }
+function payLabel(c) { return isCardNo(c) ? 'Card ' + c : String(c || 'Card'); }
 function renderTop() {
-  $('cardChip').textContent = 'Card ' + S.card;
+  $('cardChip').textContent = payLabel(S.card);
   $('dateChip').textContent = prettyDate(S.date);
-  $('cardPick').innerHTML = D.cards.map(function (c) {
-    return '<span class="chip' + (c === S.card ? ' on' : '') + '" data-card="' + c + '">' + c + '</span>';
-  }).join('');
+  var cards = D.cards.slice();
+  if (S.card && isCardNo(S.card) && cards.indexOf(S.card) === -1) cards.push(S.card);       // e.g. read off a receipt
+  var methods = METHODS.slice();
+  if (S.card && !isCardNo(S.card) && methods.indexOf(S.card) === -1) methods.push(S.card);   // e.g. typed in
+  var chip = function (c) { return '<span class="chip' + (c === S.card ? ' on' : '') + '" data-card="' + esc(c) + '">' + esc(c) + '</span>'; };
+  $('cardGrid').innerHTML = cards.map(chip).join('');
+  $('methodGrid').innerHTML = methods.map(chip).join('');
   $('cardPick').querySelectorAll('[data-card]').forEach(function (el) {
     el.onclick = function () { S.card = el.dataset.card; $('cardPick').classList.add('hide'); renderTop(); };
   });
 }
-$('cardChip').onclick = function () { $('cardPick').classList.toggle('hide'); $('datePick').classList.add('hide'); $('avPick').classList.add('hide'); };
-$('dateChip').onclick = function () { $('datePick').classList.toggle('hide'); $('cardPick').classList.add('hide'); $('dateInput').value = S.date; };
+$('cardOtherGo').onclick = function () {
+  var v = $('cardOther').value.trim();
+  if (!v) return;
+  var digits = v.replace(/\D/g, '');
+  S.card = /^\d+$/.test(v.replace(/[\s*xX•-]/g, '')) && digits.length >= 3 ? digits.slice(-4) : v.slice(0, 30);
+  $('cardOther').value = ''; $('cardPick').classList.add('hide'); renderTop();
+};
+$('cardOther').addEventListener('keydown', function (ev) { if (ev.key === 'Enter') { ev.preventDefault(); $('cardOtherGo').click(); } });
+// only one pop-up open at a time
+function openPanel(id) {
+  ['gearMenu', 'avPick', 'cardPick', 'datePick'].forEach(function (p) { $(p).classList.toggle('hide', p !== id || !$(p).classList.contains('hide')); });
+}
+document.querySelectorAll('[data-close]').forEach(function (x) { x.onclick = function () { $(x.dataset.close).classList.add('hide'); }; });
+$('cardChip').onclick = function () { openPanel('cardPick'); };
+$('dateChip').onclick = function () { openPanel('datePick'); $('dateInput').value = S.date; };
 document.querySelectorAll('[data-days]').forEach(function (el) {
   el.onclick = function () { S.date = S.pickedDate = daysAgo(Number(el.dataset.days)); $('datePick').classList.add('hide'); renderTop(); };
 });
@@ -553,7 +604,7 @@ function renderEvList() {
 }
 $('evSearch').oninput = renderEvList;
 $('editEvents').onclick = function () { $('gearMenu').classList.add('hide'); openEventScreen(true); };
-$('gearBtn').onclick = function () { $('gearMenu').classList.toggle('hide'); };
+$('gearBtn').onclick = function () { openPanel('gearMenu'); };
 $('evDone').onclick = function () { D.user.myEvents = evPicked; savePrefs(); renderEvents(); show('main'); };
 
 /* ---------- spent list ---------- */
@@ -651,6 +702,7 @@ function handlePhoto(file, scan) {
       if (p.amount && !$('amount').value) { $('amount').value = p.amount; filled.push('amount'); }
       if (p.store && !S.store && !S.other) { S.store = p.store; filled.push('store'); }
       if (p.date && p.date <= daysAgo(0) && p.date >= daysAgo(365)) { S.date = p.date; filled.push('date'); }
+      if (p.card4) { S.card = D.cards.find(function (c) { return Number(c) === Number(p.card4); }) || p.card4; filled.push('card'); }
       renderTop(); renderStores(); renderBudget();
       setReceipt(filled.length ? '✓ Scanned: check it' : '✓ Attached: fill in', '');
     }, function (e) {
@@ -803,6 +855,14 @@ function fixQueued(id, bad) {
 window.addEventListener('online', function () { renderQueue(); processQueue(); });
 window.addEventListener('offline', function () { renderQueue(); });
 setInterval(processQueue, 30000);
+
+/* ---------- clear: throw away what she started typing ---------- */
+$('clearBtn').onclick = function () {
+  $('amount').value = ''; $('item').value = ''; $('orderNo').value = ''; $('otherStore').value = ''; $('starOther').checked = false;
+  S.store = null; S.other = false; S.receiptId = null; S.photo = null; S.isReturn = false;
+  S.date = S.pickedDate || daysAgo(0); S.card = D.user.card || D.cards[0];
+  $('err').textContent = ''; setReceipt('', ''); renderReturn(); renderTop(); renderStores(); renderBudget();
+};
 
 /* ---------- return / refund ---------- */
 function renderReturn() {

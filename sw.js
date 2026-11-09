@@ -1,6 +1,6 @@
 // Keeps the app's own files on the phone so it opens instantly, even with no signal.
 // Purchases never go through here: they go straight to the Google script.
-const CACHE = 'yiddishe-gelt-v1';
+const CACHE = 'yiddishe-gelt-v2';
 const FILES = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './icon-maskable-512.png', './apple-touch-icon.png'];
 
 self.addEventListener('install', e => {
