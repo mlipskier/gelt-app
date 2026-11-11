@@ -1,0 +1,1353 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Yiddishe Gelt</title>
+<meta name="theme-color" content="#0b6e70">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Yiddishe Gelt">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" href="icon-192.png">
+<script>
+  // iPhone saves the exact address (with the private code) when it has no manifest, so only Android/computers get one
+  if (!/iPhone|iPad|iPod/.test(navigator.userAgent)) {
+    var l = document.createElement('link'); l.rel = 'manifest'; l.href = 'manifest.webmanifest'; document.head.appendChild(l);
+  }
+</script>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<style>
+  :root { --ink:#12302f; --muted:#5b7473; --line:#cfe3e2; --bg:#eef7f6; --card:#fff;
+          --blue:#0b6e70; --blue-bg:#d9f1ef; --blue-line:#7cc8c3; --deep:#08484a;
+          --amber:#8a5208; --amber-bg:#FAEEDA; --red:#A32D2D; --red-bg:#FCEBEB; --green:#0b6e4f; }
+  * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  body { margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; color:var(--ink); background:var(--bg); font-size:16px; }
+  .wrap { max-width:460px; margin:0 auto; padding:calc(10px + env(safe-area-inset-top)) 14px calc(4px + env(safe-area-inset-bottom)); }
+  .top { display:flex; justify-content:space-between; align-items:center; font-size:15px; color:var(--muted); margin-bottom:10px; }
+  .lbl { display:flex; justify-content:space-between; font-size:12px; color:var(--muted); margin:12px 0 6px; }
+  .lbl a { color:var(--blue); text-decoration:none; }
+  .chip { display:inline-block; padding:7px 13px; border:1px solid var(--line); border-radius:18px; font-size:14px; margin:0 6px 6px 0; background:var(--card); cursor:pointer; user-select:none; }
+    .chip.small { padding:8px 14px; font-size:15px; margin:0 0 0 6px; }
+  input[type=text], input[type=date] { width:100%; font-size:16px; padding:9px 10px; border:1px solid var(--line); border-radius:8px; background:var(--card); color:var(--ink); }
+  .amt { font-size:26px; font-weight:500; padding:6px 10px; }
+  .box { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:10px 12px; margin-top:4px; }
+  .bar { height:6px; background:var(--line); border-radius:3px; margin:8px 0 6px; overflow:hidden; }
+  .bar div { height:6px; background:var(--blue); width:0; }
+  .row2 { display:flex; gap:8px; margin-top:12px; }
+  .btn { flex:1; text-align:center; padding:11px 8px; min-height:46px; border:1px solid var(--line); border-radius:8px; background:var(--card); font-size:15px; cursor:pointer; }
+  .btn.dash { border-style:dashed; color:var(--muted); }
+  .save { display:block; width:100%; margin-top:4px; padding:14px; min-height:54px; font-size:19px !important; border:0; border-radius:8px; background:var(--blue); color:#fff; font-size:17px; font-weight:500; }
+  .save:disabled { opacity:.6; }
+  .muted { color:var(--muted); font-size:13px; }
+  .err { color:var(--red); font-size:14px; margin-bottom:6px; } .err:empty { display:none; }
+  .toast { background:#d6f2e6; color:var(--green); border-radius:8px; padding:10px 12px; font-size:14px; margin-bottom:8px; }
+  .item { display:flex; justify-content:space-between; gap:10px; padding:9px 0; border-top:1px solid var(--line); font-size:14px; }
+  .item a { color:var(--blue); font-size:13px; }
+  .check { display:flex; align-items:center; gap:10px; padding:9px 2px; border-top:1px solid var(--line); font-size:15px; }
+  .check input { width:24px; height:24px; }
+  .hide { display:none !important; }
+  .back { color:var(--blue); font-size:15px; margin-bottom:10px; cursor:pointer; display:inline-block; }
+  h2 { font-size:18px; font-weight:500; margin:0 0 4px; }
+  .title { display:flex; justify-content:space-between; align-items:center; margin:0 0 4px; }
+  .title b { font-size:21px; font-weight:600; color:var(--deep); }
+  .snd { font-size:13px; color:var(--muted); cursor:pointer; padding:5px 10px; border:1px solid var(--line); border-radius:16px; background:var(--card); }
+  .snd.on { color:var(--deep); background:var(--blue-bg); border-color:var(--blue-line); }
+  .grid2 { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; }
+  .grid3 { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; }
+  .grid2 .chip, .grid3 .chip { display:flex; align-items:center; justify-content:center; text-align:center; min-height:50px; margin:0; padding:6px 8px; border-radius:12px; font-size:16px; line-height:1.2; }
+  .chip.on { background:var(--blue); color:#fff; border-color:var(--blue); font-weight:500; }
+  .chip.on::before { content:'✓ '; white-space:pre; }
+  .chip.dashed { border-style:dashed; color:var(--muted); }
+  .chip:active, .btn:active, .save:active { transform:scale(0.97); }
+  .amtwrap { position:relative; }
+  #amtSign { position:absolute; left:14px; top:50%; transform:translateY(-50%); font-size:30px; color:var(--muted); }
+  .amt { font-size:30px !important; font-weight:500; padding:10px 12px 10px 34px !important; height:62px; }
+  .savebar { position:sticky; bottom:0; padding:10px 0 8px; background:linear-gradient(rgba(238,247,246,0), var(--bg) 30%); }
+  .tiles .chip { min-height:42px !important; font-size:14px !important; padding:4px 6px !important; border-radius:10px !important; }
+  input.big { font-size:18px; height:54px; padding:10px 14px; border-radius:10px; border:1.5px solid var(--blue-line); }
+  .amt { padding-right:112px !important; height:64px; border:1.5px solid var(--blue-line) !important; border-radius:10px !important; }
+  input.big:focus, .amt:focus { outline:none; border-color:var(--blue) !important; box-shadow:0 0 0 3px var(--blue-bg); }
+  .gear { font-size:22px; color:var(--deep); padding:4px 10px; cursor:pointer; }
+  .btn.done { border-style:solid; color:var(--deep); background:var(--blue-bg); border-color:var(--blue-line); }
+  .toast { position:fixed; top:10px; left:12px; right:12px; z-index:5; max-width:436px; margin:0 auto; }
+  .av { width:38px; height:38px; border-radius:50%; background:var(--blue); color:#fff; display:inline-flex; align-items:center; justify-content:center;
+        font-size:15px; font-weight:600; cursor:pointer; overflow:hidden; border:2px solid var(--blue-line); flex:0 0 auto; }
+  .av.emoji { background:var(--blue-bg); font-size:21px; }
+  .av img { width:100%; height:100%; object-fit:cover; }
+  .avgrid { display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); gap:6px; }
+  .avgrid span { font-size:24px; text-align:center; padding:6px 0; border-radius:10px; cursor:pointer; border:1px solid var(--line); background:var(--card); }
+  .avgrid span.on { border-color:var(--blue); background:var(--blue-bg); }
+  @media (max-height: 660px) {
+    .tiles .chip { min-height:36px !important; font-size:13px !important; }
+    .amt { height:52px; font-size:26px !important; } #amtSign { font-size:26px; }
+    input.big { height:46px; font-size:17px; } .btn { min-height:40px; padding:8px; } .save { min-height:48px; padding:11px; }
+    .grid3, .grid2 { gap:6px; } .title b { font-size:19px; } .av { width:32px; height:32px; } .chip.small { padding:6px 12px; }
+    #budgetBox { margin-top:6px !important; } .amtwrap, #storeChips, .row2 { margin-top:8px !important; }
+  }
+  .desk-hint { display:none; font-size:13px; color:var(--muted); }
+  @media (min-width: 820px) {
+    .wrap { max-width:940px; padding:28px 24px; }
+    .cols { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:28px; align-items:start; }
+    .colL, .colR { background:var(--card); border:1px solid var(--line); border-radius:14px; padding:18px 20px; }
+    .colR .amtwrap { margin-top:6px !important; }
+    .savebar { position:static; background:none; padding:12px 0 0; }
+    .desk-hint { display:block; }
+    .tiles .chip, .chip, .btn, .save { cursor:pointer; }
+    .chip:hover:not(.on), .btn:hover { border-color:var(--blue-line); background:#f4fbfa; }
+    .toast { max-width:520px; }
+    #evScreen, #stScreen, #spScreen, #enScreen, #edScreen { max-width:560px; margin:0 auto; }
+  }
+  .retpill { position:absolute; right:10px; top:50%; transform:translateY(-50%); font-size:14px; padding:7px 11px; border-radius:16px;
+             border:1px solid var(--line); background:var(--card); color:var(--muted); cursor:pointer; }
+  .amtwrap.ret .amt { padding-left:54px !important; border-color:#e2a65a !important; background:#fff8ee; color:var(--amber); }
+  .amtwrap.ret #amtSign { color:var(--amber); }
+  .amtwrap.ret .retpill { background:var(--amber); color:#fff; border-color:var(--amber); }
+  .toast { display:flex; justify-content:space-between; align-items:center; gap:10px; }
+  .toast .undo { font-weight:600; color:var(--deep); text-decoration:underline; cursor:pointer; white-space:nowrap; padding:4px 2px; }
+  .flbl { display:block; font-size:13px; color:var(--muted); margin:10px 0 4px; }
+  select.big { width:100%; font-size:17px; height:54px; padding:0 10px; border-radius:10px; border:1.5px solid var(--blue-line); background:var(--card); color:var(--ink); }
+  .delbtn { display:block; width:100%; margin-top:10px; color:var(--red); border-color:#f0c4c4; background:var(--card); }
+  .delbtn.sure { background:var(--red); color:#fff; border-color:var(--red); }
+  .entry { display:flex; justify-content:space-between; gap:10px; padding:11px 4px; border-top:1px solid var(--line); cursor:pointer; font-size:15px; }
+  .entry:active { background:var(--blue-bg); }
+  .neg { color:var(--green); }
+  .panel { background:var(--deep); color:#fff; border-radius:16px; padding:12px 14px 14px; margin:2px 0 12px; box-shadow:0 6px 18px rgba(8,72,74,.28); position:relative; }
+  .panel::before { content:''; position:absolute; top:-7px; right:40px; border:7px solid transparent; border-top:0; border-bottom-color:var(--deep); }
+  #avPick.panel::before { left:22px; right:auto; }
+  #cardPick.panel::before { right:150px; }
+  #gearMenu.panel::before { right:14px; }
+  .phead { display:flex; justify-content:space-between; align-items:center; font-size:15px; font-weight:600; margin-bottom:10px; }
+  .pclose { font-size:13px; font-weight:500; opacity:.85; cursor:pointer; padding:4px 2px; }
+  .plabel { font-size:12px; opacity:.8; margin:8px 0 6px; }
+  .panel .chip { background:rgba(255,255,255,.12); color:#fff; border-color:rgba(255,255,255,.35); }
+  .panel .chip.on { background:#f5c445; color:#3d2b00; border-color:#f5c445; }
+  .panel .grid2 .chip, .panel .grid3 .chip { min-height:44px; }
+  .panel .btn { background:rgba(255,255,255,.12); color:#fff; border-color:rgba(255,255,255,.35); }
+  .panel input.big, .panel input[type=date] { background:#fff; color:var(--ink); border-color:transparent; }
+  .panel .avgrid span { background:rgba(255,255,255,.9); border-color:transparent; }
+  .panel .avgrid span.on { background:#f5c445; }
+  .saverow { display:flex; gap:8px; }
+  .saverow .save { flex:1; margin-top:0; }
+  .clearbtn { flex:0 0 26%; min-height:54px; color:var(--muted); background:var(--card); }
+  body.desk .wrap { max-width:1240px; padding:22px 28px; }
+  .dtop { display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; }
+  .dtop b { font-size:24px; font-weight:600; color:var(--deep); }
+  .dright { display:flex; align-items:center; gap:14px; }
+  .dwho { display:flex; align-items:center; gap:8px; color:var(--muted); }
+  .dwho .av { width:32px; height:32px; cursor:default; }
+  .dcard { background:var(--card); border:1px solid var(--line); border-radius:14px; padding:16px 18px; margin-bottom:16px; }
+  .dform { border:2px solid var(--blue); }
+  .drow { display:grid; grid-template-columns:1.35fr 1.2fr 1.05fr 1.45fr 1.25fr 1.1fr 1.15fr auto; gap:10px; align-items:end; }
+  .drow.noorder { grid-template-columns:1.6fr 1fr 1.3fr 1.9fr 1fr 1.1fr auto; }
+  .df { position:relative; }
+  .df label { display:flex; justify-content:space-between; align-items:center; font-size:12px; color:var(--muted); margin-bottom:5px; height:20px; }
+  .df input, .df select { width:100%; height:46px; font-size:16px; padding:0 12px; border:1.5px solid var(--blue-line); border-radius:10px; background:#fff; color:var(--ink); }
+  .df input:focus, .df select:focus { outline:none; border-color:var(--blue); box-shadow:0 0 0 3px var(--blue-bg); }
+  .df .save { margin:0; min-height:46px; height:46px; padding:0 26px; font-size:17px !important; }
+  .df.ret input { border-color:#e2a65a; background:#fff8ee; color:var(--amber); }
+  .dret { white-space:nowrap; font-size:11px; padding:1px 8px; border:1px solid var(--line); border-radius:10px; cursor:pointer; color:var(--muted); }
+  .dret.on { background:var(--amber); color:#fff; border-color:var(--amber); }
+  .dd { position:absolute; left:0; right:0; top:74px; background:#fff; border:1px solid var(--line); border-radius:10px; box-shadow:0 8px 22px rgba(8,72,74,.16); z-index:5; max-height:320px; overflow:auto; }
+  .dd div { padding:9px 12px; cursor:pointer; display:flex; justify-content:space-between; gap:8px; font-size:15px; }
+  .dd div.hi { background:var(--blue-bg); }
+  .dd .h { font-size:12px; color:var(--muted); white-space:nowrap; }
+  .dbud { margin-top:12px; font-size:15px; color:var(--muted); }
+  .dbud b { color:var(--ink); }
+  .dbud .bar { height:6px; max-width:420px; margin:6px 0 0; }
+  .dfoot { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-top:12px; flex-wrap:wrap; }
+  .ddrop { border:2px dashed var(--blue-line); border-radius:10px; padding:8px 14px; font-size:14px; color:var(--muted); }
+  .ddrop.over, .ddrop.done { border-color:var(--blue); background:var(--blue-bg); color:var(--deep); }
+  .dfoot a, .ddrop a { color:var(--blue); cursor:pointer; text-decoration:underline; }
+  .hint { font-size:13px; color:var(--muted); }
+  .kbd { font-family:monospace; background:#fff; border:1px solid var(--line); border-bottom-width:2px; border-radius:4px; padding:0 5px; font-size:12px; }
+  .dth { margin-bottom:6px; }
+  table.dt { width:100%; border-collapse:collapse; font-size:14px; }
+  .dt th { text-align:left; color:var(--muted); font-weight:500; font-size:12px; padding:6px 8px; border-bottom:1px solid var(--line); }
+  .dt td { padding:9px 8px; border-bottom:1px solid #e6f0ef; }
+  .dt .num { text-align:right; white-space:nowrap; }
+  .dt a { color:var(--blue); cursor:pointer; font-size:13px; margin-left:8px; }
+  .dt a.sure { color:#fff; background:var(--red); padding:2px 8px; border-radius:6px; text-decoration:none; }
+  #deskMain .panel { max-width:560px; margin-left:auto; }
+  .sendchip { font-size:12px; color:var(--muted); background:var(--card); border:1px solid var(--line); border-radius:12px; padding:3px 9px; }
+  .qerr { background:var(--red-bg); color:var(--red); border-radius:10px; padding:10px 12px; font-size:14px; margin:0 0 8px; }
+  .qerr .row { display:flex; justify-content:space-between; align-items:center; gap:8px; padding:4px 0; }
+  .qerr a { color:var(--red); font-weight:600; margin-left:10px; cursor:pointer; text-decoration:underline; }
+  .over { color:var(--red); } .near { color:var(--amber); }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div id="loading" class="muted" style="padding:30px 0;text-align:center;">Yiddishe Gelt<br>Loading…</div>
+  <div id="notset" class="hide" style="padding:24px 0;">
+    <div class="title"><b>Yiddishe Gelt</b></div>
+    <p id="nsMsg" style="line-height:1.5;"></p>
+    <p class="muted" style="margin:16px 0 6px;">Paste your private link here:</p>
+    <input type="text" id="linkPaste" class="big" placeholder="https://…#s=…&k=…" autocomplete="off">
+    <div id="linkErr" class="err" style="margin-top:6px;"></div>
+    <button class="save" id="linkGo" style="margin-top:10px;">Open</button>
+  </div>
+  <div id="welcome" class="hide" style="padding:24px 0;">
+    <div class="title"><b>Yiddishe Gelt</b></div>
+    <h2 id="wHi" style="margin-top:12px;"></h2>
+    <p style="line-height:1.5;">Put Yiddishe Gelt on your home screen so it opens like an app.</p>
+    <div class="box" id="wHow" style="line-height:1.6;font-size:15px;"></div>
+    <button class="save hide" id="wInstall" style="margin-top:12px;">Add to home screen</button>
+    <button class="btn" id="wSkip" style="margin-top:10px;width:100%;">Continue</button>
+  </div>
+
+  <!-- MAIN SCREEN -->
+  <div id="main" class="hide">
+    <div id="toast" class="toast hide"></div>
+    <div class="cols"><div class="colL">
+    <div class="title"><b>Yiddishe Gelt</b><span style="display:flex;align-items:center;gap:6px;"><span id="sendChip" class="sendchip hide"></span><span class="gear" id="gearBtn" aria-label="Settings">⚙︎</span></span></div>
+    <div id="qErr" class="qerr hide"></div>
+    <div id="gearMenu" class="hide panel">
+      <div class="phead"><span>Settings</span><span class="pclose" data-close="gearMenu">✕ Close</span></div>
+      <div class="grid2">
+        <span class="chip" id="entriesBtn">My entries</span>
+        <span class="chip" id="editEvents">My events</span>
+        <span class="chip" id="editStores">My stores</span>
+        <span class="chip" id="sndBtn">Coin sound</span>
+      </div>
+    </div>
+    <div class="top">
+      <span style="display:flex;align-items:center;gap:8px;"><span class="av" id="avBtn" aria-label="Change your picture"></span><span id="who"></span></span>
+      <span><span class="chip small" id="cardChip"></span><span class="chip small" id="dateChip">Today</span></span>
+    </div>
+    <div id="avPick" class="hide panel">
+      <div class="phead"><span>Your picture</span><span class="pclose" data-close="avPick">✕ Close</span></div>
+      <div class="avgrid" id="avGrid"></div>
+      <div class="row2" style="margin-top:8px;">
+        <div class="btn" id="avUpload">📷 Use a photo</div>
+        <div class="btn" id="avInitials">Just initials</div>
+      </div>
+      <input type="file" id="avFile" accept="image/*" class="hide">
+    </div>
+    <div id="cardPick" class="hide panel">
+      <div class="phead"><span>Paid with</span><span class="pclose" data-close="cardPick">✕ Close</span></div>
+      <div class="plabel">Card (last 4 digits)</div>
+      <div class="grid3" id="cardGrid"></div>
+      <div class="plabel">Not a card</div>
+      <div class="grid3" id="methodGrid"></div>
+      <div style="display:flex;gap:8px;margin-top:10px;">
+        <input type="text" id="cardOther" class="big" placeholder="Other: last 4 digits or a word" autocomplete="off" style="height:46px;">
+        <div class="btn" id="cardOtherGo" style="flex:0 0 70px;min-height:46px;">Use</div>
+      </div>
+    </div>
+    <div id="datePick" class="hide panel">
+      <div class="phead"><span>Date of purchase</span><span class="pclose" data-close="datePick">✕ Close</span></div>
+      <div class="grid3"><span class="chip" data-days="0">Today</span><span class="chip" data-days="1">Yesterday</span><span class="chip" data-days="2">2 days ago</span></div>
+      <input type="date" id="dateInput" style="margin-top:8px;min-height:48px;">
+    </div>
+
+    <div id="eventChips" class="grid3 tiles"></div>
+
+    <div id="budgetBox" class="box hide" style="margin-top:8px;padding:8px 12px;">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px;">
+        <span><span id="leftTxt" style="font-size:17px;font-weight:500;"></span> <span id="ofTxt" class="muted"></span></span>
+        <a href="#" id="seeSpent" style="color:var(--blue);font-size:14px;text-decoration:none;white-space:nowrap;">See spent ›</a>
+      </div>
+      <div class="bar" style="margin:6px 0 2px;"><div id="barFill"></div></div>
+      <div id="afterTxt" class="muted"></div>
+    </div>
+
+    </div><div class="colR">
+    <div class="desk-hint">Paste a total from any order page; it keeps just the number.</div>
+    <div class="amtwrap" id="amtWrap" style="margin-top:10px;"><span id="amtSign">$</span><input type="text" id="amount" class="amt" inputmode="decimal" placeholder="0.00" autocomplete="off" aria-label="Amount"><span class="retpill" id="retBtn">↩ Return</span></div>
+
+    <div id="storeChips" class="grid3 tiles" style="margin-top:10px;"></div>
+    <div id="otherBox" class="hide" style="margin-top:8px;">
+      <input type="text" id="otherStore" class="big" placeholder="Store name">
+      <label class="muted" style="display:flex;gap:8px;align-items:center;margin-top:6px;"><input type="checkbox" id="starOther"> Add to my stores</label>
+    </div>
+
+    <div style="display:flex;gap:8px;margin-top:10px;">
+      <input type="text" id="item" class="big" placeholder="What for? (drinks, prizes…)" aria-label="What for">
+      <input type="text" id="orderNo" class="big hide" style="flex:0 0 50%;font-size:15px;padding:10px;" placeholder="Order #" inputmode="numeric" autocomplete="off">
+    </div>
+
+    <div class="row2" style="margin-top:10px;">
+      <div class="btn dash" id="scanBtn">📷 Scan receipt</div>
+      <div class="btn dash" id="photoBtn">Attach receipt</div>
+    </div>
+    <input type="file" id="scanFile" accept="image/*" capture="environment" class="hide">
+    <input type="file" id="photoFile" accept="image/*,application/pdf" class="hide">
+
+    <div class="savebar">
+      <div id="err" class="err"></div>
+      <div class="saverow"><button class="btn clearbtn" id="clearBtn">Clear</button><button class="save" id="saveBtn">Save</button></div>
+      <div class="desk-hint" style="text-align:center;margin-top:6px;">Press Enter to save · paste a screenshot to attach it</div>
+    </div>
+    </div></div>
+  </div>
+
+  <!-- COMPUTER LAYOUT: one quick line -->
+  <div id="deskMain" class="hide">
+    <div class="dtop"><b>Yiddishe Gelt</b>
+      <span class="dright"><span id="dSendSlot"></span><span class="dwho"><span class="av" id="dAv"></span><span id="dWho"></span></span><span class="gear" id="dGear" aria-label="Settings">⚙︎</span></span></div>
+    <div id="dGearSlot"></div>
+    <div id="dQerrSlot"></div>
+    <div class="dcard dform">
+      <div class="drow">
+        <div class="df"><label for="dEvent">Event</label><input id="dEvent" autocomplete="off" placeholder="Type to search"><div class="dd hide" id="dEventDD"></div></div>
+        <div class="df"><label for="dAmount">Amount <span class="dret" id="dRet">↩ Return</span></label><input id="dAmount" inputmode="decimal" placeholder="$0.00" autocomplete="off"></div>
+        <div class="df"><label for="dStore">Store</label><input id="dStore" autocomplete="off" placeholder="Amazon"><div class="dd hide" id="dStoreDD"></div></div>
+        <div class="df"><label for="dItem">What for</label><input id="dItem" autocomplete="off" placeholder="paper goods"></div>
+        <div class="df" id="dOrderWrap"><label for="dOrder">Order #</label><input id="dOrder" autocomplete="off" placeholder="112-…"></div>
+        <div class="df"><label for="dDate">Date</label><input type="date" id="dDate"></div>
+        <div class="df"><label for="dPaid">Paid with</label><select id="dPaid"></select><input id="dPaidOther" class="hide" placeholder="Last 4 or a word" autocomplete="off"></div>
+        <div class="df"><label>&nbsp;</label><button class="save" id="dSave">Save</button></div>
+      </div>
+      <div class="dbud" id="dBud">Pick an event to see its budget.</div>
+      <div class="dfoot">
+        <span class="ddrop" id="dDrop">📎 Drop a receipt here, paste a screenshot, or <a id="dAttach">choose a file</a></span>
+        <span class="hint">Type, then <span class="kbd">Tab</span> to the next box · <span class="kbd">Enter</span> saves · <a id="dClear">Clear</a></span>
+      </div>
+      <div class="err" id="dErr"></div>
+    </div>
+    <div class="dcard"><div class="dth"><b>Today</b> <span class="hint" id="dTodaySum"></span></div><div id="dToday"><div class="hint">Loading…</div></div></div>
+  </div>
+
+  <!-- PICK MY EVENTS / ALL EVENTS -->
+  <div id="evScreen" class="hide">
+    <span class="back" data-back>‹ Back</span>
+    <h2 id="evTitle">Pick your events</h2>
+    <p class="muted" id="evHint" style="margin:0 0 8px;">Your first five show as buttons on your main screen.</p>
+    <input type="text" id="evSearch" placeholder="Search events">
+    <div id="evList" style="margin-top:8px;"></div>
+    <button class="save" id="evDone">Done</button>
+  </div>
+
+  <!-- MY STORES -->
+  <div id="stScreen" class="hide">
+    <span class="back" data-back>‹ Back</span>
+    <h2>Your stores</h2>
+    <p class="muted" style="margin:0 0 8px;">Starred stores show after the common ones (8 buttons fit on the screen; the rest are under Other).</p>
+    <div id="stList"></div>
+    <div style="display:flex;gap:8px;margin-top:10px;">
+      <input type="text" id="stNew" placeholder="Add a store">
+      <div class="btn" id="stAdd" style="flex:0 0 70px;">Add</div>
+    </div>
+    <button class="save" id="stDone">Done</button>
+  </div>
+
+  <!-- MY ENTRIES -->
+  <div id="enScreen" class="hide">
+    <span class="back" data-back>‹ Back</span>
+    <h2 id="enTitle">My entries</h2>
+    <p class="muted" id="enHint" style="margin:0 0 8px;"></p>
+    <input type="text" id="enSearch" placeholder="Search: name, store, event, amount" class="hide">
+    <div id="enList" style="margin-top:8px;"><div class="muted">Loading…</div></div>
+  </div>
+
+  <!-- EDIT ONE ENTRY -->
+  <div id="edScreen" class="hide">
+    <span class="back" id="edBack">‹ Back</span>
+    <h2>Edit entry</h2>
+    <p class="muted" id="edWho" style="margin:0 0 10px;"></p>
+    <label class="flbl">Event</label><select id="edEvent" class="big"></select>
+    <label class="flbl">Amount</label>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <input type="text" id="edAmount" class="big" inputmode="decimal" style="flex:1;">
+      <label class="chip" style="margin:0;display:flex;gap:6px;align-items:center;min-height:54px;"><input type="checkbox" id="edReturn"> Return</label>
+    </div>
+    <label class="flbl">Store</label><input type="text" id="edStore" class="big" list="storeList"><datalist id="storeList"></datalist>
+    <label class="flbl">What for</label><input type="text" id="edItem" class="big">
+    <div style="display:flex;gap:8px;">
+      <div style="flex:1"><label class="flbl">Date</label><input type="date" id="edDate" class="big"></div>
+      <div style="flex:1"><label class="flbl">Card</label><select id="edCard" class="big"></select></div>
+    </div>
+    <div id="edOrderWrap" class="hide"><label class="flbl">Amazon order #</label><input type="text" id="edOrder" class="big"></div>
+    <div id="edReceipt" style="margin-top:10px;"></div>
+    <div id="edErr" class="err" style="margin-top:10px;"></div>
+    <button class="save" id="edSave" style="margin-top:10px;">Save changes</button>
+    <button class="btn delbtn" id="edDelete">Delete this entry</button>
+  </div>
+
+  <!-- SPENT LIST -->
+  <div id="spScreen" class="hide">
+    <span class="back" data-back>‹ Back</span>
+    <h2 id="spTitle"></h2>
+    <div id="spSub" class="muted" style="margin-bottom:8px;"></div>
+    <div id="spList"><div class="muted">Loading…</div></div>
+  </div>
+
+</div>
+
+<script>
+var D = null;               // data from the sheet
+var S = { event:null, store:null, card:null, date:null, pickedDate:null, receiptId:null, other:false, isReturn:false };
+var lastSaved = null, toastTimer = null;
+var loadedAt = Date.now();
+var $ = function (id) { return document.getElementById(id); };
+var money = function (n) { n = Number(n); return (n < 0 ? '−$' : '$') + Math.abs(n).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}); };
+var money0 = function (n) { return '$' + Math.round(n).toLocaleString('en-US'); };
+
+var DESK = !!(window.matchMedia && matchMedia('(min-width: 900px)').matches);
+if (DESK) document.body.classList.add('desk');
+function show(id) {
+  if (id === 'main' && DESK) id = 'deskMain';
+  $('deskMain').classList.toggle('hide', id !== 'deskMain');
+  ['main','evScreen','stScreen','spScreen','enScreen','edScreen','loading','notset','welcome'].forEach(function (x) { $(x).classList.toggle('hide', x !== id); });
+  window.scrollTo(0, 0);
+}
+document.querySelectorAll('[data-back]').forEach(function (b) { b.onclick = function () { show('main'); }; });
+
+function ymd(d) { return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0'); }
+function daysAgo(n) { var d = new Date(); d.setDate(d.getDate() - n); return ymd(d); }
+function prettyDate(s) {
+  if (s === daysAgo(0)) return 'Today';
+  if (s === daysAgo(1)) return 'Yesterday';
+  var p = s.split('-'); return Number(p[1]) + '/' + Number(p[2]);
+}
+
+/* ---------- private link + talking to the back office ---------- */
+function parseLink(text) {
+  text = String(text || '');
+  var s = text.match(/[#&?]s=([A-Za-z0-9_-]+)/), k = text.match(/[#&?]k=([A-Za-z0-9]+)/);
+  return s && k ? { s: s[1], k: k[1].toUpperCase() } : null;
+}
+var LINK = parseLink(location.hash);
+try { if (LINK) localStorage.setItem('yg_link', JSON.stringify(LINK)); else LINK = JSON.parse(localStorage.getItem('yg_link') || 'null'); } catch (e) {}
+
+function api(action, data) {
+  if (!LINK) return Promise.reject(new Error('No link'));
+  var body = Object.assign({ action: action, code: LINK.k }, data || {});
+  return fetch('https://script.google.com/macros/s/' + LINK.s + '/exec', {
+    method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(body), redirect: 'follow'
+  }).then(function (r) { return r.json(); }, function () {
+    var e = new Error('No connection right now.'); e.offline = true; throw e;
+  }).then(function (r) {
+    if (r && r.error) {
+      if (r.error === 'badCode') { badLink(); }
+      var e = new Error(r.error); e.server = true; throw e;
+    }
+    return r;
+  });
+}
+// same shape as before, so the rest of the app didn't need to change
+var google = { script: { get run() {
+  var ok = function () {}, fail = function () {};
+  var call = function (p, map) { p.then(function (r) { ok(map ? map(r) : r); }, function (e) { fail(e); }); };
+  var o = {
+    withSuccessHandler: function (f) { ok = f; return o; },
+    withFailureHandler: function (f) { fail = f; return o; },
+    getInitData: function () { call(api('init')); },
+    getEventItems: function (ev) { call(api('items', { event: ev }), function (r) { return r.items; }); },
+    getEntries: function () { call(api('entries')); },
+    updateEntry: function (row, fp, p) { call(api('update', { row: row, fp: fp, p: p })); },
+    deleteEntry: function (row, fp) { call(api('delete', { row: row, fp: fp })); },
+    saveMyPrefs: function (e, s) { call(api('prefs', { myEvents: e, myStores: s })); },
+    saveMyAvatar: function (v) { call(api('avatar', { avatar: v })); }
+  };
+  return o;
+} } };
+
+function badLink() {
+  clearCache();
+  try { localStorage.removeItem('yg_link'); } catch (e) {}
+  LINK = null;
+  $('nsMsg').textContent = 'This link isn\'t working anymore. Ask Mushky for your new private link.';
+  show('notset');
+}
+$('linkGo').onclick = function () {
+  var l = parseLink($('linkPaste').value);
+  if (!l) { $('linkErr').textContent = 'That doesn\'t look like a Yiddishe Gelt link.'; return; }
+  try { localStorage.setItem('yg_link', JSON.stringify(l)); } catch (e) {}
+  location.hash = 's=' + l.s + '&k=' + l.k; location.reload();
+};
+
+/* ---------- load: show last time's data instantly, then refresh ---------- */
+var CACHE_KEY = 'yg_cache_v2_' + (LINK ? LINK.k : 'none');
+function readCache() { try { return JSON.parse(localStorage.getItem(CACHE_KEY) || 'null'); } catch (e) { return null; } }
+function writeCache(d) { try { localStorage.setItem(CACHE_KEY, JSON.stringify(d)); } catch (e) {} }
+function clearCache() { try { localStorage.removeItem(CACHE_KEY); } catch (e) {} }
+
+var cached = readCache();
+setTimeout(function () {
+  if (!LINK) { $('nsMsg').textContent = 'Open your private link from Mushky (she\'ll text or email it to you).'; show('notset'); return; }
+  if (cached && cached.user && !D) init(cached);
+  loadFresh();
+}, 0);  // after the whole script is ready
+function loadFresh() {
+ google.script.run.withSuccessHandler(function (fresh) {
+  writeCache(fresh);
+  if (!D || D.user.email !== fresh.user.email) { init(fresh); processQueue(); return; }
+  // same person: swap in fresh numbers without disturbing what she's typing
+  qAll().then(function (list) { fresh.events.forEach(function (ev) { list.forEach(function (x) { if (x.event === ev.name && x.status !== 'error') ev.spent += x.amount; }); }); renderBudget(); });
+  D.events = fresh.events; D.cards = fresh.cards; D.commonStores = fresh.commonStores;
+  var keepAvatar = D.user.avatar;
+  D.user = fresh.user; if (keepAvatar !== fresh.user.avatar && avatarChangedHere) D.user.avatar = keepAvatar;
+  if (D.cards.indexOf(S.card) === -1) S.card = D.user.card || D.cards[0];
+  renderAvatar(); renderTop(); renderEvents(); renderStores();
+  processQueue();
+}).withFailureHandler(function (e) {
+  if (!D && LINK) $('loading').innerHTML = 'Yiddishe Gelt<br>' + (e.offline ? 'No connection. Open again when you have signal.' : esc(e.message));
+ }).getInitData();
+}
+var avatarChangedHere = false;
+
+function init(data) {
+  D = data;
+  S.card = D.user.card || D.cards[0];
+  S.date = S.pickedDate = daysAgo(0);
+  $('who').textContent = D.user.name;
+  renderAvatar();
+  renderTop(); renderEvents(); renderStores();
+  if (DESK) deskInit();
+  if (shouldWelcome()) showWelcome(); else show('main');
+  renderQueue();
+}
+
+/* ---------- first open: add to home screen ---------- */
+var installEvt = null;
+window.addEventListener('beforeinstallprompt', function (e) { e.preventDefault(); installEvt = e; if (!$('welcome').classList.contains('hide')) $('wInstall').classList.remove('hide'); });
+function isInstalled() { return (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true; }
+function shouldWelcome() { try { return !isInstalled() && !localStorage.getItem('yg_welcomed'); } catch (e) { return false; } }
+function showWelcome() {
+  $('wHi').textContent = 'Hi ' + D.user.name + '!';
+  var ios = /iPhone|iPad|iPod/.test(navigator.userAgent), android = /Android/.test(navigator.userAgent);
+  $('wHow').innerHTML = ios
+    ? '1. Tap the <b>Share</b> button (square with an arrow) at the bottom of Safari.<br>2. Scroll and tap <b>Add to Home Screen</b>.<br>3. Tap <b>Add</b>. Then open Yiddishe Gelt from your home screen.'
+    : android
+    ? 'Tap <b>Add to home screen</b> below. If nothing happens, tap Chrome\'s <b>⋮</b> menu → <b>Add to Home screen</b> (or <b>Install app</b>).'
+    : 'On a computer, bookmark this page, or click the <b>install</b> icon at the right end of Chrome\'s address bar.';
+  $('wInstall').classList.toggle('hide', !installEvt);
+  show('welcome');
+}
+$('wInstall').onclick = function () {
+  if (!installEvt) return;
+  installEvt.prompt();
+  installEvt.userChoice.then(function () { installEvt = null; $('wSkip').click(); });
+};
+$('wSkip').onclick = function () { try { localStorage.setItem('yg_welcomed', '1'); } catch (e) {} show('main'); };
+
+/* ---------- avatar ---------- */
+var AVATARS = ['🌸','🦋','🌊','🐚','⭐','🌻','🍀','🍓','💎','☕','🎀','🌷'];
+function renderAvatar() {
+  var a = D.user.avatar || '', el = $('avBtn');
+  el.className = 'av';
+  if (a.indexOf('data:image') === 0) el.innerHTML = '<img src="' + a + '" alt="">';
+  else if (a) { el.classList.add('emoji'); el.textContent = a; }
+  else el.textContent = D.user.name.split(/\s+/).map(function (w) { return w.charAt(0); }).join('').slice(0, 2).toUpperCase();
+  $('avGrid').innerHTML = AVATARS.map(function (e) { return '<span class="' + (e === a ? 'on' : '') + '">' + e + '</span>'; }).join('');
+  $('avGrid').querySelectorAll('span').forEach(function (s) { s.onclick = function () { setAvatar(s.textContent); }; });
+}
+function setAvatar(v) {
+  D.user.avatar = v; avatarChangedHere = true; writeCache(D); renderAvatar(); $('avPick').classList.add('hide');
+  google.script.run.saveMyAvatar(v);
+}
+$('avBtn').onclick = function () { openPanel('avPick'); };
+$('avInitials').onclick = function () { setAvatar(''); };
+$('avUpload').onclick = function () { $('avFile').value = ''; $('avFile').click(); };
+$('avFile').onchange = function () {
+  var f = this.files[0]; if (!f) return;
+  var img = new Image(), url = URL.createObjectURL(f);
+  img.onload = function () {
+    var s = Math.min(img.width, img.height), c = document.createElement('canvas'); c.width = c.height = 120;
+    c.getContext('2d').drawImage(img, (img.width - s) / 2, (img.height - s) / 2, s, s, 0, 0, 120, 120);
+    URL.revokeObjectURL(url);
+    setAvatar(c.toDataURL('image/jpeg', 0.8));
+  };
+  img.src = url;
+};
+
+/* ---------- card + date ---------- */
+var METHODS = ['Invoice', 'Check', 'PayPal', 'Cash'];
+function isCardNo(c) { return /^\d{3,4}$/.test(String(c)); }
+function payLabel(c) { return isCardNo(c) ? 'Card ' + c : String(c || 'Card'); }
+function renderTop() {
+  $('cardChip').textContent = payLabel(S.card);
+  $('dateChip').textContent = prettyDate(S.date);
+  var cards = D.cards.slice();
+  if (S.card && isCardNo(S.card) && cards.indexOf(S.card) === -1) cards.push(S.card);       // e.g. read off a receipt
+  var methods = METHODS.slice();
+  if (S.card && !isCardNo(S.card) && methods.indexOf(S.card) === -1) methods.push(S.card);   // e.g. typed in
+  var chip = function (c) { return '<span class="chip' + (c === S.card ? ' on' : '') + '" data-card="' + esc(c) + '">' + esc(c) + '</span>'; };
+  $('cardGrid').innerHTML = cards.map(chip).join('');
+  $('methodGrid').innerHTML = methods.map(chip).join('');
+  $('cardPick').querySelectorAll('[data-card]').forEach(function (el) {
+    el.onclick = function () { S.card = el.dataset.card; $('cardPick').classList.add('hide'); renderTop(); };
+  });
+}
+$('cardOtherGo').onclick = function () {
+  var v = $('cardOther').value.trim();
+  if (!v) return;
+  var digits = v.replace(/\D/g, '');
+  S.card = /^\d+$/.test(v.replace(/[\s*xX•-]/g, '')) && digits.length >= 3 ? digits.slice(-4) : v.slice(0, 30);
+  $('cardOther').value = ''; $('cardPick').classList.add('hide'); renderTop();
+};
+$('cardOther').addEventListener('keydown', function (ev) { if (ev.key === 'Enter') { ev.preventDefault(); $('cardOtherGo').click(); } });
+// only one pop-up open at a time
+function openPanel(id) {
+  ['gearMenu', 'avPick', 'cardPick', 'datePick'].forEach(function (p) { $(p).classList.toggle('hide', p !== id || !$(p).classList.contains('hide')); });
+}
+document.querySelectorAll('[data-close]').forEach(function (x) { x.onclick = function () { $(x.dataset.close).classList.add('hide'); }; });
+$('cardChip').onclick = function () { openPanel('cardPick'); };
+$('dateChip').onclick = function () { openPanel('datePick'); $('dateInput').value = S.date; };
+document.querySelectorAll('[data-days]').forEach(function (el) {
+  el.onclick = function () { S.date = S.pickedDate = daysAgo(Number(el.dataset.days)); $('datePick').classList.add('hide'); renderTop(); };
+});
+$('dateInput').onchange = function () { if ($('dateInput').value) { S.date = S.pickedDate = $('dateInput').value; $('datePick').classList.add('hide'); renderTop(); } };
+
+/* ---------- events ---------- */
+function eventByName(n) { return D.events.find(function (e) { return e.name === n; }); }
+function myEventList() {
+  var mine = D.user.myEvents.filter(eventByName);
+  if (mine.length) return mine;
+  // nothing picked yet: show events with the most recent spending
+  return D.events.slice().sort(function (a, b) { return b.last - a.last; }).slice(0, 4).map(function (e) { return e.name; });
+}
+function renderEvents() {
+  var list = myEventList().slice(0, 5);
+  if (S.event && list.indexOf(S.event) === -1) list = list.concat([S.event]);
+  $('eventChips').innerHTML = list.map(function (n) {
+    return '<span class="chip' + (n === S.event ? ' on' : '') + '" data-ev="' + esc(n) + '">' + esc(n) + '</span>';
+  }).join('') + '<span class="chip dashed" id="allEv">More…</span>';
+  $('eventChips').querySelectorAll('[data-ev]').forEach(function (el) {
+    el.onclick = function () { S.event = el.dataset.ev; renderEvents(); if (isDesk && !$('amount').value) $('amount').focus(); };
+  });
+  $('allEv').onclick = function () { openEventScreen(false); };
+  renderBudget();
+}
+function renderBudget() {
+  var e = S.event && eventByName(S.event);
+  if (!e) { $('budgetBox').classList.add('hide'); return; }
+  $('budgetBox').classList.remove('hide');
+  var amt = (parseFloat($('amount').value.replace(/[$,]/g, '')) || 0) * (S.isReturn ? -1 : 1);
+  var left = e.budget - e.spent, after = left - amt;
+  $('leftTxt').textContent = e.budget ? (left >= 0 ? money0(left) + ' left' : money0(-left) + ' over') : money0(e.spent) + ' spent';
+  $('leftTxt').className = left < 0 ? 'over' : '';
+  $('ofTxt').textContent = e.budget ? 'of ' + money0(e.budget) : 'no budget set';
+  var pct = e.budget ? Math.min(100, (e.spent + amt) / e.budget * 100) : 0;
+  $('barFill').style.width = pct + '%';
+  $('barFill').style.background = after < 0 ? 'var(--red)' : (pct >= 90 ? 'var(--amber)' : 'var(--blue)');
+  if (amt && e.budget) {
+    var lead = S.isReturn ? 'After this return: ' : 'After this: ';
+    $('afterTxt').textContent = after >= 0 ? lead + money(after) + ' left' : lead + money(-after) + ' over budget';
+    $('afterTxt').className = 'muted' + (after < 0 ? ' over' : (pct >= 90 ? ' near' : ''));
+  } else { $('afterTxt').textContent = ''; }
+}
+$('amount').addEventListener('paste', function (ev) {
+  var t = (ev.clipboardData || window.clipboardData).getData('text') || '';
+  var m = t.replace(/,/g, '').match(/\d+(?:\.\d{1,2})?/g);
+  if (!m) return;
+  ev.preventDefault();
+  var dollars = t.replace(/,/g, '').match(/\$\s*(\d+(?:\.\d{1,2})?)/g);  // prefer a $ amount, the last one is usually the total
+  var pick = dollars ? dollars[dollars.length - 1].replace(/[$\s]/g, '') : m[m.length - 1];
+  $('amount').value = Number(pick).toFixed(2);
+  renderBudget();
+});
+$('amount').oninput = function () {
+  var v = $('amount').value.replace(/[^0-9.]/g, ''), i = v.indexOf('.');
+  if (i !== -1) v = v.slice(0, i + 1) + v.slice(i + 1).replace(/\./g, '').slice(0, 2);
+  if (v !== $('amount').value) $('amount').value = v;
+  renderBudget();
+};
+
+var evPickMode = true, evPicked = [];
+function openEventScreen(pickMode) {
+  evPickMode = pickMode;
+  evPicked = D.user.myEvents.slice();
+  $('evTitle').textContent = pickMode ? 'Pick your events' : 'All events';
+  $('evHint').classList.toggle('hide', !pickMode);
+  $('evDone').classList.toggle('hide', !pickMode);
+  $('evSearch').value = '';
+  renderEvList(); show('evScreen');
+}
+function renderEvList() {
+  var q = $('evSearch').value.toLowerCase();
+  var names = D.events.map(function (e) { return e.name; }).filter(function (n) { return n.toLowerCase().indexOf(q) !== -1; });
+  $('evList').innerHTML = names.map(function (n) {
+    return evPickMode
+      ? '<label class="check" style="min-height:50px;"><input type="checkbox" data-n="' + esc(n) + '"' + (evPicked.indexOf(n) !== -1 ? ' checked' : '') + '>' + esc(n) + '</label>'
+      : '<div class="check" data-n="' + esc(n) + '" style="cursor:pointer;min-height:50px;">' + esc(n) + '</div>';
+  }).join('');
+  $('evList').querySelectorAll('[data-n]').forEach(function (el) {
+    if (evPickMode) el.onchange = function () {
+      var n = el.dataset.n;
+      evPicked = el.checked ? evPicked.concat([n]) : evPicked.filter(function (x) { return x !== n; });
+    };
+    else el.onclick = function () { S.event = el.dataset.n; renderEvents(); show('main'); };
+  });
+}
+$('evSearch').oninput = renderEvList;
+$('editEvents').onclick = function () { $('gearMenu').classList.add('hide'); openEventScreen(true); };
+$('gearBtn').onclick = function () { openPanel('gearMenu'); };
+$('evDone').onclick = function () { D.user.myEvents = evPicked; savePrefs(); renderEvents(); show('main'); };
+
+/* ---------- spent list ---------- */
+$('seeSpent').onclick = function (ev) {
+  ev.preventDefault();
+  var e = eventByName(S.event);
+  $('spTitle').textContent = e.name;
+  $('spSub').textContent = money(e.spent) + ' spent' + (e.budget ? ' · ' + money(e.budget - e.spent) + ' left of ' + money0(e.budget) : '');
+  $('spList').innerHTML = '<div class="muted">Loading…</div>';
+  show('spScreen');
+  google.script.run.withSuccessHandler(function (items) {
+    if (!items.length) { $('spList').innerHTML = '<div class="muted">Nothing logged yet.</div>'; return; }
+    $('spList').innerHTML = items.map(function (it) {
+      var d = it.date ? new Date(it.date) : null;
+      return '<div class="item"><div>' + esc(it.item || '(no description)') + '<div class="muted">' + esc(it.who) + ' · ' + esc(it.store) +
+        (d ? ' · ' + (d.getMonth()+1) + '/' + d.getDate() : '') + '</div></div><div style="text-align:right;white-space:nowrap;">' + money(it.amount) +
+        (it.receipt ? '<br><a href="' + it.receipt + '" target="_blank">receipt</a>' : '') + '</div></div>';
+    }).join('');
+  }).withFailureHandler(function (err) {
+    $('spList').innerHTML = '<div class="err">' + (err.offline ? 'No connection. Try again when you have signal.' : esc(err.message)) + '</div>';
+  }).getEventItems(e.name);
+};
+
+/* ---------- stores ---------- */
+function renderStores() {
+  var common = D.commonStores.filter(function (s) { return D.user.amazon || !isAmazon_(s); });
+  var mine = D.user.myStores.filter(function (s) { return common.indexOf(s) === -1; });
+  var shown = common.map(function (s) { return storeChip(s, false); })
+    .concat(mine.map(function (s) { return storeChip(s, true); })).slice(0, 8);
+  if (S.store && !S.other && shown.join('').indexOf('data-st="' + esc(S.store) + '"') === -1) shown[7] = storeChip(S.store, false);
+  var html = shown.join('') +
+    '<span class="chip dashed' + (S.other ? ' on' : '') + '" id="otherChip">Other…</span>';
+  $('storeChips').innerHTML = html;
+  $('storeChips').querySelectorAll('[data-st]').forEach(function (el) {
+    el.onclick = function () { S.store = el.dataset.st; S.other = false; renderStores(); };
+  });
+  $('otherChip').onclick = function () { S.other = true; S.store = null; renderStores(); $('otherStore').focus(); };
+  $('otherBox').classList.toggle('hide', !S.other);
+  $('orderNo').classList.toggle('hide', !(D.user.amazon && isAmazon_(S.other ? $('otherStore').value : S.store || '')));
+}
+function isAmazon_(s) { return String(s).toLowerCase().indexOf('amazon') !== -1; }
+function storeChip(s, star) {
+  return '<span class="chip' + (s === S.store && !S.other ? ' on' : '') + '" data-st="' + esc(s) + '">' + (star ? '★ ' : '') + esc(s) + '</span>';
+}
+$('otherStore').oninput = function () {
+  $('orderNo').classList.toggle('hide', !(D.user.amazon && isAmazon_($('otherStore').value)));
+};
+// type digits only; dashes go in by themselves (112-1234567-1234567)
+$('orderNo').addEventListener('paste', function (ev) {
+  var t = (ev.clipboardData || window.clipboardData).getData('text') || '';
+  var m = t.match(/\d{3}-\d{7}-\d{7}/);
+  if (m) { ev.preventDefault(); $('orderNo').value = m[0]; }
+});
+$('orderNo').oninput = function () {
+  var d = $('orderNo').value.replace(/\D/g, '').slice(0, 17);
+  $('orderNo').value = d.length > 10 ? d.slice(0,3) + '-' + d.slice(3,10) + '-' + d.slice(10)
+                     : d.length > 3 ? d.slice(0,3) + '-' + d.slice(3) : d;
+};
+
+var stEdit = [];
+$('editStores').onclick = function () { $('gearMenu').classList.add('hide'); stEdit = D.user.myStores.slice(); renderStList(); show('stScreen'); };
+function renderStList() {
+  $('stList').innerHTML = stEdit.length ? stEdit.map(function (s, i) {
+    return '<div class="check" style="justify-content:space-between;"><span>★ ' + esc(s) + '</span><span data-rm="' + i + '" style="color:var(--red);cursor:pointer;">Remove</span></div>';
+  }).join('') : '<div class="muted">No starred stores yet.</div>';
+  $('stList').querySelectorAll('[data-rm]').forEach(function (el) {
+    el.onclick = function () { stEdit.splice(Number(el.dataset.rm), 1); renderStList(); };
+  });
+}
+$('stAdd').onclick = function () {
+  var v = $('stNew').value.trim();
+  if (v && stEdit.indexOf(v) === -1) stEdit.push(v);
+  $('stNew').value = ''; renderStList();
+};
+$('stDone').onclick = function () { D.user.myStores = stEdit; savePrefs(); renderStores(); show('main'); };
+
+function savePrefs() { writeCache(D); google.script.run.saveMyPrefs(D.user.myEvents, D.user.myStores); }
+
+/* ---------- receipt ---------- */
+$('scanBtn').onclick = function () { $('scanFile').value = ''; $('scanFile').click(); };
+$('photoBtn').onclick = function () { $('photoFile').value = ''; $('photoFile').click(); };
+$('scanFile').onchange = function () { handlePhoto(this.files[0], true); };
+$('photoFile').onchange = function () { handlePhoto(this.files[0], false); };
+
+function handlePhoto(file, scan) {
+  if (!file) return;
+  var isPdf = file.type === 'application/pdf';
+  setReceipt(scan ? 'Reading receipt…' : '', '');
+  (isPdf ? readRaw : shrink)(file, function (b64) {
+    S.photo = { b64: b64, mime: isPdf ? 'application/pdf' : 'image/jpeg' };
+    S.receiptId = 'local';
+    if (!scan) { setReceipt('', '✓ Receipt attached'); return; }
+    api('scan', { b64: b64, mime: S.photo.mime }).then(function (r) {
+      var p = r.parsed || {}, filled = [];
+      if (p.amount && !$('amount').value) { $('amount').value = p.amount; filled.push('amount'); }
+      if (p.store && !S.store && !S.other) { S.store = p.store; filled.push('store'); }
+      if (p.date && p.date <= daysAgo(0) && p.date >= daysAgo(365)) { S.date = p.date; filled.push('date'); }
+      if (p.card4) { S.card = D.cards.find(function (c) { return Number(c) === Number(p.card4); }) || p.card4; filled.push('card'); }
+      renderTop(); renderStores(); renderBudget();
+      setReceipt(filled.length ? '✓ Scanned: check it' : '✓ Attached: fill in', '');
+    }, function (e) {
+      // no signal: the photo still goes with the entry, she just types the details
+      setReceipt('', '✓ Receipt attached');
+      $('err').textContent = e.offline ? 'Can\'t read receipts offline. Photo is attached; type the details.' : 'Couldn\'t read it: ' + e.message;
+    });
+  });
+}
+function setReceipt(scanTxt, photoTxt) {
+  $('scanBtn').textContent = scanTxt || '📷 Scan receipt';
+  $('photoBtn').textContent = photoTxt || 'Attach receipt';
+  $('scanBtn').classList.toggle('done', !!scanTxt && scanTxt.charAt(0) === '✓');
+  $('photoBtn').classList.toggle('done', !!photoTxt);
+}
+function readRaw(file, cb) {
+  var r = new FileReader();
+  r.onload = function () { cb(String(r.result).split(',')[1]); };
+  r.readAsDataURL(file);
+}
+function shrink(file, cb) {
+  var img = new Image(), url = URL.createObjectURL(file);
+  img.onload = function () {
+    var max = 1600, w = img.width, h = img.height, k = Math.min(1, max / Math.max(w, h));
+    var c = document.createElement('canvas'); c.width = Math.round(w * k); c.height = Math.round(h * k);
+    c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+    URL.revokeObjectURL(url);
+    cb(c.toDataURL('image/jpeg', 0.82).split(',')[1]);
+  };
+  img.src = url;
+}
+
+/* ---------- save ---------- */
+$('saveBtn').onclick = function () {
+  var amount = parseFloat($('amount').value.replace(/[$,]/g, ''));
+  var store = S.other ? $('otherStore').value.trim() : S.store;
+  var item = $('item').value.trim();
+  var problem = !S.event ? 'Pick an event.' : !(amount > 0) ? 'Enter the amount.' : !store ? 'Pick a store.' : !item ? 'Type what it was for.' : '';
+  $('err').textContent = problem;
+  if (problem) return;
+  if (soundOn) { try { actx = actx || new (window.AudioContext || window.webkitAudioContext)(); actx.resume(); } catch (e) {} }
+
+  if (S.other && $('starOther').checked && D.user.myStores.indexOf(store) === -1) {
+    D.user.myStores.push(store); savePrefs();
+  }
+  var appId = newId();
+  var signed = (S.isReturn ? -1 : 1) * Math.round(amount * 100) / 100;
+  var payload = { appId: appId, isReturn: S.isReturn, item: item, store: store, amount: amount.toFixed(2), card: S.card, date: S.date,
+                  event: S.event, orderNo: $('orderNo').value.trim(),
+                  photo: S.photo ? S.photo.b64 : null, photoMime: S.photo ? S.photo.mime : null };
+  var entry = { appId: appId, p: payload, event: S.event, amount: signed, at: Date.now(), status: 'waiting' };
+
+  // done on the phone right away; it sends itself in the background
+  qPut(entry).then(processQueue);
+  if (soundOn) playCoins();
+  var e = eventByName(S.event); e.spent = Math.round((e.spent + signed) * 100) / 100; writeCache(D);
+  var left = e.budget - e.spent;
+  lastSaved = { appId: appId, event: e.name, amount: signed };
+  showToast((S.isReturn ? '✓ Return saved. ' : '✓ Saved. ') + e.name + (e.budget ? (left >= 0 ? ' has ' + money(left) + ' left.' : ' is ' + money(-left) + ' over.') : '.'), true);
+  // back to a blank screen for the next one
+  $('amount').value = ''; $('item').value = ''; $('orderNo').value = ''; $('otherStore').value = ''; $('starOther').checked = false;
+  S.store = null; S.other = false; S.receiptId = null; S.photo = null; S.isReturn = false; setReceipt('', ''); renderReturn();
+  S.event = null; S.card = D.user.card || D.cards[0]; S.date = S.pickedDate = daysAgo(0); $('err').textContent = '';
+  renderTop(); renderEvents(); renderStores(); renderBudget(); renderQueue();
+  if (window.deskAfterSave) deskAfterSave();
+};
+
+/* ---------- sending queue (kept on the phone until the sheet has it) ---------- */
+function newId() {
+  var a = new Uint8Array(9); (window.crypto || window.msCrypto).getRandomValues(a);
+  return Date.now().toString(36) + '-' + Array.prototype.map.call(a, function (b) { return (b % 36).toString(36); }).join('');
+}
+var dbp = null;
+function db() {
+  if (dbp) return dbp;
+  dbp = new Promise(function (res, rej) {
+    var r = indexedDB.open('yiddishe-gelt', 1);
+    r.onupgradeneeded = function () { r.result.createObjectStore('queue', { keyPath: 'appId' }); };
+    r.onsuccess = function () { res(r.result); }; r.onerror = function () { rej(r.error); };
+  });
+  return dbp;
+}
+function qTx(mode, fn) { return db().then(function (d) { return new Promise(function (res, rej) {
+  var t = d.transaction('queue', mode), s = t.objectStore('queue'), out = fn(s);
+  t.oncomplete = function () { res(out && out.result !== undefined ? out.result : undefined); }; t.onerror = function () { rej(t.error); };
+}); }); }
+function qPut(x) { return qTx('readwrite', function (s) { return s.put(x); }); }
+function qDel(id) { return qTx('readwrite', function (s) { return s.delete(id); }); }
+function qAll() { return qTx('readonly', function (s) { return s.getAll(); }).then(function (a) { return (a || []).sort(function (x, y) { return x.at - y.at; }); }); }
+
+var sending = false, inflight = null, undoAfterSend = {}, retryTimer = null;
+function processQueue() {
+  if (sending || !LINK) return;
+  sending = true;
+  qAll().then(function (list) {
+    var next = list.filter(function (x) { return x.status !== 'error'; })[0];
+    renderQueue(list);
+    if (!next) { sending = false; return; }
+    inflight = next.appId;
+    api('save', { p: next.p }).then(function (r) {
+      return qDel(next.appId).then(function () {
+        var ev = D && eventByName(next.event);
+        if (ev && typeof r.spent === 'number') { ev.spent = r.spent + pendingFor(list, next); writeCache(D); renderBudget(); }
+        if (undoAfterSend[next.appId]) { delete undoAfterSend[next.appId]; api('delete', { appId: next.appId }).then(refreshTotals, function () {}); }
+        if (window.deskAfterSend) deskAfterSend();
+        sending = false; inflight = null; processQueue();
+      });
+    }, function (err) {
+      sending = false; inflight = null;
+      if (err.offline) { renderQueue(list); clearTimeout(retryTimer); retryTimer = setTimeout(processQueue, 15000); return; }
+      if (err.message === 'badCode') return;
+      next.status = 'error'; next.msg = err.message;
+      qPut(next).then(function () { renderQueue(); processQueue(); });
+    });
+  }, function () { sending = false; });
+}
+// other unsent entries for the same event still count toward what she sees
+function pendingFor(list, done) {
+  return list.filter(function (x) { return x.appId !== done.appId && x.event === done.event && x.status !== 'error'; })
+             .reduce(function (s, x) { return s + x.amount; }, 0);
+}
+function renderQueue(list) {
+  if (!list) { qAll().then(renderQueue, function () {}); return; }
+  var waiting = list.filter(function (x) { return x.status !== 'error'; }), bad = list.filter(function (x) { return x.status === 'error'; });
+  $('sendChip').classList.toggle('hide', !waiting.length);
+  $('sendChip').textContent = navigator.onLine === false ? '⏳ ' + waiting.length + ' waiting for signal' : '⏳ Sending ' + waiting.length;
+  $('qErr').classList.toggle('hide', !bad.length);
+  $('qErr').innerHTML = bad.map(function (x) {
+    return '<div class="row"><span>⚠ Didn\'t save: ' + esc(x.p.item) + ', ' + money(x.amount) + '. ' + esc(x.msg || '') + '</span>' +
+      '<span style="white-space:nowrap;"><a data-fix="' + x.appId + '">Fix</a><a data-drop="' + x.appId + '">Delete</a></span></div>';
+  }).join('');
+  $('qErr').querySelectorAll('[data-fix]').forEach(function (a) { a.onclick = function () { fixQueued(a.dataset.fix, bad); }; });
+  $('qErr').querySelectorAll('[data-drop]').forEach(function (a) { a.onclick = function () {
+    var x = bad.find(function (y) { return y.appId === a.dataset.drop; });
+    qDel(x.appId).then(function () { var e = eventByName(x.event); if (e) { e.spent -= x.amount; renderBudget(); } renderQueue(); });
+  }; });
+}
+// puts a refused entry back on the screen so she can correct it and save again
+function fixQueued(id, bad) {
+  var x = bad.find(function (y) { return y.appId === id; }); if (!x) return;
+  qDel(id).then(function () {
+    var e = eventByName(x.event); if (e) e.spent -= x.amount;
+    S.event = eventByName(x.p.event) ? x.p.event : null; S.isReturn = !!x.p.isReturn;
+    $('amount').value = x.p.amount; $('item').value = x.p.item.replace(/^RETURN - /i, '');
+    S.store = x.p.store; S.other = false; S.card = x.p.card; S.date = x.p.date; $('orderNo').value = x.p.orderNo || '';
+    S.photo = x.p.photo ? { b64: x.p.photo, mime: x.p.photoMime } : null; S.receiptId = S.photo ? 'local' : null;
+    setReceipt('', S.photo ? '✓ Receipt attached' : '');
+    renderTop(); renderEvents(); renderStores(); renderReturn(); renderQueue();
+    $('err').textContent = x.msg || '';
+  });
+}
+window.addEventListener('online', function () { renderQueue(); processQueue(); });
+window.addEventListener('offline', function () { renderQueue(); });
+setInterval(processQueue, 30000);
+
+/* ---------- clear: throw away what she started typing ---------- */
+$('clearBtn').onclick = function () {
+  $('amount').value = ''; $('item').value = ''; $('orderNo').value = ''; $('otherStore').value = ''; $('starOther').checked = false;
+  S.store = null; S.other = false; S.receiptId = null; S.photo = null; S.isReturn = false;
+  S.date = S.pickedDate || daysAgo(0); S.card = D.user.card || D.cards[0];
+  $('err').textContent = ''; setReceipt('', ''); renderReturn(); renderTop(); renderStores(); renderBudget();
+};
+
+/* ---------- return / refund ---------- */
+function renderReturn() {
+  $('amtWrap').classList.toggle('ret', S.isReturn);
+  $('amtSign').textContent = S.isReturn ? '−$' : '$';
+  $('retBtn').textContent = S.isReturn ? '↩ Return ✓' : '↩ Return';
+  $('saveBtn').textContent = S.isReturn ? 'Save return' : 'Save';
+  renderBudget();
+}
+$('retBtn').onclick = function () { S.isReturn = !S.isReturn; renderReturn(); };
+
+/* ---------- toast + undo ---------- */
+function showToast(text, undo) {
+  $('toast').innerHTML = '<span>' + esc(text) + '</span>' + (undo ? '<span class="undo" id="undoBtn">Undo</span>' : '');
+  $('toast').classList.remove('hide');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(function () { $('toast').classList.add('hide'); }, undo ? 9000 : 4000);
+  if (undo) $('undoBtn').onclick = undoLast;
+}
+function undoLast() {
+  if (!lastSaved) return;
+  var ls = lastSaved; lastSaved = null;
+  var done = function () {
+    var e = eventByName(ls.event); if (e) { e.spent = Math.round((e.spent - ls.amount) * 100) / 100; writeCache(D); }
+    renderBudget(); renderQueue(); showToast('Undone. That entry was removed.', false);
+    if (window.deskAfterSend) deskAfterSend();
+  };
+  if (inflight === ls.appId) { undoAfterSend[ls.appId] = true; done(); return; }     // being sent this second: remove right after
+  qAll().then(function (list) {
+    if (list.some(function (x) { return x.appId === ls.appId; })) { qDel(ls.appId).then(done); return; }   // never left the phone
+    api('delete', { appId: ls.appId }).then(done, function (err) {
+      showToast('Couldn\'t undo: ' + err.message, false);
+    });
+  });
+}
+
+/* ---------- my entries: edit and delete ---------- */
+var enData = [], edCur = null;
+$('entriesBtn').onclick = function () { $('gearMenu').classList.add('hide'); openEntries(); };
+function openEntries() {
+  $('enTitle').textContent = D.user.admin ? 'All entries' : 'My entries';
+  $('enHint').textContent = D.user.admin ? 'Everyone\'s entries from the last 90 days. Tap one to change or delete it.'
+                                         : 'What you logged in the last 7 days. Tap one to change or delete it.';
+  $('enSearch').classList.toggle('hide', !D.user.admin);
+  $('enList').innerHTML = '<div class="muted">Loading…</div>';
+  show('enScreen');
+  google.script.run.withSuccessHandler(function (r) { enData = r.items; renderEntries(); })
+    .withFailureHandler(function (e) { $('enList').innerHTML = '<div class="err">' + (e.offline ? 'No connection. Try again when you have signal.' : esc(e.message)) + '</div>'; }).getEntries();
+}
+function renderEntries() {
+  var q = $('enSearch').value.toLowerCase().trim();
+  var list = enData.filter(function (it) {
+    return !q || [it.who, it.item, it.store, it.event, String(it.amount)].join(' ').toLowerCase().indexOf(q) !== -1;
+  });
+  if (!list.length) { $('enList').innerHTML = '<div class="muted">Nothing here yet.</div>'; return; }
+  $('enList').innerHTML = list.map(function (it, i) {
+    var p = it.date.split('-');
+    return '<div class="entry" data-i="' + enData.indexOf(it) + '"><div>' + esc(it.item) + '<div class="muted">' +
+      (D.user.admin ? esc(it.who) + ' · ' : '') + esc(it.store) + ' · ' + esc(it.event) + (it.date ? ' · ' + Number(p[1]) + '/' + Number(p[2]) : '') +
+      '</div></div><div style="white-space:nowrap;text-align:right;" class="' + (it.amount < 0 ? 'neg' : '') + '">' + money(it.amount) + ' ›</div></div>';
+  }).join('');
+  $('enList').querySelectorAll('[data-i]').forEach(function (el) { el.onclick = function () { openEdit(enData[Number(el.dataset.i)]); }; });
+}
+$('enSearch').oninput = renderEntries;
+
+function openEdit(it) {
+  edCur = it;
+  $('edWho').textContent = 'Logged by ' + it.who;
+  $('edEvent').innerHTML = D.events.map(function (e) { return '<option' + (e.name === it.event ? ' selected' : '') + '>' + esc(e.name) + '</option>'; }).join('');
+  if (!eventByName(it.event)) $('edEvent').insertAdjacentHTML('afterbegin', '<option selected value="">Pick an event</option>');
+  $('edAmount').value = Math.abs(it.amount).toFixed(2);
+  $('edReturn').checked = it.amount < 0;
+  $('edStore').value = it.store;
+  $('storeList').innerHTML = D.commonStores.concat(D.user.myStores).map(function (s) { return '<option value="' + esc(s) + '">'; }).join('');
+  $('edItem').value = it.item.replace(/^RETURN - /i, '');
+  $('edDate').value = it.date;
+  var cards = D.cards.indexOf(it.card) === -1 && it.card ? D.cards.concat([it.card]) : D.cards;
+  $('edCard').innerHTML = cards.map(function (c) { return '<option' + (c === it.card ? ' selected' : '') + '>' + esc(c) + '</option>'; }).join('');
+  $('edOrderWrap').classList.toggle('hide', !D.user.admin);
+  $('edOrder').value = it.orderNo || '';
+  $('edReceipt').innerHTML = it.receipt ? '<a href="' + it.receipt + '" target="_blank" style="color:var(--blue)">View receipt</a>' : '';
+  $('edErr').textContent = '';
+  $('edDelete').classList.remove('sure'); $('edDelete').textContent = 'Delete this entry';
+  show('edScreen');
+}
+$('edBack').onclick = function () { if (DESK) show('main'); else show('enScreen'); };
+function afterEdit() { if (DESK) { show('main'); if (window.loadToday) setTimeout(loadToday, 300); } else openEntries(); }
+$('edAmount').oninput = function () {
+  var v = $('edAmount').value.replace(/[^0-9.]/g, ''), i = v.indexOf('.');
+  if (i !== -1) v = v.slice(0, i + 1) + v.slice(i + 1).replace(/\./g, '').slice(0, 2);
+  if (v !== $('edAmount').value) $('edAmount').value = v;
+};
+$('edSave').onclick = function () {
+  var p = { event: $('edEvent').value, amount: $('edAmount').value, isReturn: $('edReturn').checked, store: $('edStore').value.trim(),
+            item: $('edItem').value.trim(), date: $('edDate').value, card: $('edCard').value, orderNo: $('edOrder').value.trim() };
+  var problem = !p.event ? 'Pick an event.' : !(parseFloat(p.amount) > 0) ? 'Enter the amount.' : !p.store ? 'Enter the store.' : !p.item ? 'Type what it was for.' : !p.date ? 'Pick a date.' : '';
+  $('edErr').textContent = problem; if (problem) return;
+  $('edSave').disabled = true; $('edSave').textContent = 'Saving…';
+  google.script.run.withSuccessHandler(function () {
+    $('edSave').disabled = false; $('edSave').textContent = 'Save changes';
+    refreshTotals(); showToast('Changes saved.', false); afterEdit();
+  }).withFailureHandler(function (e) {
+    $('edSave').disabled = false; $('edSave').textContent = 'Save changes';
+    $('edErr').textContent = e.message.replace(/^Exception: /, '');
+  }).updateEntry(edCur.row, edCur.fp, p);
+};
+$('edDelete').onclick = function () {
+  if (!$('edDelete').classList.contains('sure')) { $('edDelete').classList.add('sure'); $('edDelete').textContent = 'Tap again to delete for good'; return; }
+  $('edDelete').textContent = 'Deleting…';
+  google.script.run.withSuccessHandler(function () {
+    refreshTotals(); showToast('Entry deleted.', false); afterEdit();
+  }).withFailureHandler(function (e) {
+    $('edDelete').classList.remove('sure'); $('edDelete').textContent = 'Delete this entry';
+    $('edErr').textContent = e.message.replace(/^Exception: /, '');
+  }).deleteEntry(edCur.row, edCur.fp);
+};
+// re-read budgets and totals after an edit or delete, keeping what's on the main screen
+function refreshTotals() {
+  google.script.run.withSuccessHandler(function (data) {
+    if (!data || data.error) return;
+    qAll().then(function (list) {
+      // keep counting entries that haven't reached the sheet yet
+      data.events.forEach(function (ev) { list.forEach(function (x) { if (x.event === ev.name && x.status !== 'error') ev.spent += x.amount; }); });
+      D.events = data.events; writeCache(D); renderEvents();
+    });
+  }).getInitData();
+}
+
+/* ---------- computer extras ---------- */
+var isDesk = window.matchMedia && window.matchMedia('(pointer: fine)').matches;
+['amount', 'item', 'orderNo', 'otherStore'].forEach(function (id) {
+  $(id).addEventListener('keydown', function (ev) { if (ev.key === 'Enter') { ev.preventDefault(); $('saveBtn').click(); } });
+});
+document.addEventListener('paste', function (ev) {
+  if ((DESK ? $('deskMain') : $('main')).classList.contains('hide')) return;
+  var items = (ev.clipboardData && ev.clipboardData.items) || [];
+  for (var i = 0; i < items.length; i++) {
+    if (items[i].type.indexOf('image/') === 0) { ev.preventDefault(); handlePhoto(items[i].getAsFile(), false); return; }
+  }
+});
+
+/* ---------- coming back to the app later ---------- */
+document.addEventListener('visibilitychange', function () {
+  if (document.visibilityState !== 'visible' || !D) return;
+  renderTop(); processQueue();
+  if (Date.now() - loadedAt > 5 * 60 * 1000) { loadedAt = Date.now(); refreshTotals(); }
+});
+
+/* ---------- coin sound (opt-in, remembered on this phone) ---------- */
+var soundOn = false, actx = null;
+try { soundOn = localStorage.getItem('yg_sound') === '1'; } catch (e) {}
+function renderSound() {
+  $('sndBtn').textContent = soundOn ? '🔔 Sound on' : '🔇 Sound off';
+  $('sndBtn').classList.toggle('on', soundOn);
+}
+$('sndBtn').onclick = function () {
+  soundOn = !soundOn;
+  try { localStorage.setItem('yg_sound', soundOn ? '1' : '0'); } catch (e) {}
+  renderSound();
+  if (soundOn) playCoins();
+};
+renderSound();
+function playCoins() {
+  try {
+    actx = actx || new (window.AudioContext || window.webkitAudioContext)();
+    if (actx.state === 'suspended') actx.resume();
+    var t0 = actx.currentTime + 0.02;
+    // a few coins landing: bright metallic pings with quick decay
+    [[0, 2637], [0.09, 3136], [0.17, 2793], [0.26, 3520], [0.31, 2960]].forEach(function (c, i) {
+      [1, 2.76, 5.4].forEach(function (mult, j) {
+        var o = actx.createOscillator(), g = actx.createGain();
+        o.type = 'sine';
+        o.frequency.value = c[1] * mult / (j ? 1.9 : 1);
+        var t = t0 + c[0], peak = (j ? 0.06 : 0.18) * (1 - i * 0.1);
+        g.gain.setValueAtTime(0.0001, t);
+        g.gain.exponentialRampToValueAtTime(peak, t + 0.004);
+        g.gain.exponentialRampToValueAtTime(0.0001, t + (j ? 0.12 : 0.35));
+        o.connect(g); g.connect(actx.destination);
+        o.start(t); o.stop(t + 0.4);
+      });
+    });
+  } catch (e) {}
+}
+
+/* ---------- computer layout: one quick line ---------- */
+var deskReady = false, dRetOn = false;
+function findEvent(text) {
+  var t = String(text || '').trim().toLowerCase();
+  if (!t) return null;
+  return D.events.find(function (e) { return e.name.toLowerCase() === t; }) || null;
+}
+function evMatches(q) {
+  q = q.trim().toLowerCase();
+  var list = D.events.filter(function (e) { return !q || e.name.toLowerCase().indexOf(q) !== -1; });
+  var mine = D.user.myEvents || [];
+  list.sort(function (a, b) {
+    var as = a.name.toLowerCase().indexOf(q) === 0 ? 0 : 1, bs = b.name.toLowerCase().indexOf(q) === 0 ? 0 : 1;
+    if (as !== bs) return as - bs;
+    var am = mine.indexOf(a.name) === -1 ? 1 : 0, bm = mine.indexOf(b.name) === -1 ? 1 : 0;
+    if (am !== bm) return am - bm;
+    return (b.last || 0) - (a.last || 0);
+  });
+  return list.slice(0, 10).map(function (e) {
+    var left = e.budget ? (e.budget - e.spent >= 0 ? money0(e.budget - e.spent) + ' left' : money0(e.spent - e.budget) + ' over') : '';
+    return { v: e.name, h: left };
+  });
+}
+function storeMatches(q) {
+  q = q.trim().toLowerCase();
+  var all = [];
+  D.commonStores.concat(D.user.myStores || []).forEach(function (s) { if (all.indexOf(s) === -1) all.push(s); });
+  return all.filter(function (s) { return !q || s.toLowerCase().indexOf(q) !== -1; })
+            .sort(function (a, b) { return (a.toLowerCase().indexOf(q) === 0 ? 0 : 1) - (b.toLowerCase().indexOf(q) === 0 ? 0 : 1); })
+            .slice(0, 8).map(function (s) { return { v: s, h: '' }; });
+}
+// a search box with a little list under it: arrows to move, Enter or Tab to pick
+function typeahead(input, dd, source, onPick) {
+  var items = [], hi = 0;
+  function render() {
+    items = source(input.value);
+    if (!items.length || document.activeElement !== input) { dd.classList.add('hide'); return; }
+    if (items.length === 1 && items[0].v.toLowerCase() === input.value.trim().toLowerCase()) { dd.classList.add('hide'); return; }
+    hi = Math.min(hi, items.length - 1);
+    dd.innerHTML = items.map(function (it, i) {
+      return '<div data-i="' + i + '" class="' + (i === hi ? 'hi' : '') + '"><span>' + esc(it.v) + '</span><span class="h">' + esc(it.h) + '</span></div>';
+    }).join('');
+    dd.classList.remove('hide');
+    dd.querySelectorAll('[data-i]').forEach(function (el) {
+      el.onmousedown = function (ev) { ev.preventDefault(); pick(Number(el.dataset.i)); };
+    });
+  }
+  function pick(i) { if (!items[i]) return; input.value = items[i].v; dd.classList.add('hide'); onPick && onPick(items[i].v); }
+  input.addEventListener('input', function () { hi = 0; render(); onPick && onPick(null); });
+  input.addEventListener('focus', function () { hi = 0; render(); });
+  input.addEventListener('blur', function () { setTimeout(function () { dd.classList.add('hide'); }, 120); });
+  input.addEventListener('keydown', function (ev) {
+    var open = !dd.classList.contains('hide');
+    if (ev.key === 'ArrowDown' && open) { ev.preventDefault(); hi = Math.min(hi + 1, items.length - 1); render(); }
+    else if (ev.key === 'ArrowUp' && open) { ev.preventDefault(); hi = Math.max(hi - 1, 0); render(); }
+    else if ((ev.key === 'Enter' || ev.key === 'Tab') && open && items.length) { if (ev.key === 'Enter') { ev.preventDefault(); ev.stopPropagation(); } pick(hi); }
+    else if (ev.key === 'Escape') { dd.classList.add('hide'); }
+  });
+}
+function deskInit() {
+  $('dWho').textContent = D.user.name;
+  $('dAv').innerHTML = $('avBtn').innerHTML; $('dAv').className = $('avBtn').className;
+  $('dOrderWrap').classList.toggle('hide', !D.user.admin);
+  document.querySelector('#deskMain .drow').classList.toggle('noorder', !D.user.admin);
+  fillPaid();
+  if (deskReady) { renderDBud(); return; }
+  deskReady = true;
+  // the sending note, problem note and settings live in the computer header too
+  $('deskMain').insertBefore($('toast'), $('deskMain').firstChild);
+  $('dSendSlot').appendChild($('sendChip'));
+  $('dQerrSlot').appendChild($('qErr'));
+  $('dGearSlot').appendChild($('gearMenu'));
+  $('dGear').onclick = function () { openPanel('gearMenu'); };
+  $('dDate').value = daysAgo(0);
+  typeahead($('dEvent'), $('dEventDD'), evMatches, function () { renderDBud(); });
+  typeahead($('dStore'), $('dStoreDD'), storeMatches, null);
+  $('dEvent').addEventListener('blur', function () {
+    var e = findEvent($('dEvent').value); if (e) $('dEvent').value = e.name; renderDBud();
+  });
+  $('dAmount').addEventListener('input', function () {
+    var v = $('dAmount').value.replace(/[^0-9.]/g, ''), i = v.indexOf('.');
+    if (i !== -1) v = v.slice(0, i + 1) + v.slice(i + 1).replace(/\./g, '').slice(0, 2);
+    if (v !== $('dAmount').value) $('dAmount').value = v;
+    renderDBud();
+  });
+  $('dAmount').addEventListener('paste', function (ev) {
+    var t = (ev.clipboardData || window.clipboardData).getData('text') || '';
+    var m = t.replace(/,/g, '').match(/\d+(?:\.\d{1,2})?/g); if (!m) return;
+    ev.preventDefault();
+    var dollars = t.replace(/,/g, '').match(/\$\s*(\d+(?:\.\d{1,2})?)/g);
+    $('dAmount').value = Number(dollars ? dollars[dollars.length - 1].replace(/[$\s]/g, '') : m[m.length - 1]).toFixed(2);
+    renderDBud();
+  });
+  $('dOrder').addEventListener('paste', function (ev) {
+    var t = (ev.clipboardData || window.clipboardData).getData('text') || '', m = t.match(/\d{3}-\d{7}-\d{7}/);
+    if (m) { ev.preventDefault(); $('dOrder').value = m[0]; }
+  });
+  $('dRet').onclick = function () { dRetOn = !dRetOn; renderDRet(); };
+  $('dPaid').onchange = function () {
+    if ($('dPaid').value === '__other') { $('dPaid').classList.add('hide'); $('dPaidOther').classList.remove('hide'); $('dPaidOther').focus(); }
+  };
+  ['dEvent', 'dAmount', 'dStore', 'dItem', 'dOrder', 'dDate', 'dPaid', 'dPaidOther'].forEach(function (id) {
+    $(id).addEventListener('keydown', function (ev) { if (ev.key === 'Enter' && !ev.defaultPrevented) { ev.preventDefault(); deskSave(); } });
+  });
+  $('dSave').onclick = deskSave;
+  $('dClear').onclick = function () { deskReset(); $('err').textContent = ''; S.photo = null; S.receiptId = null; setReceipt('', ''); };
+  var attach = function () { $('photoFile').value = ''; $('photoFile').click(); };
+  $('dAttach').onclick = attach;
+  var drop = $('dDrop');
+  ['dragenter', 'dragover'].forEach(function (t) { document.addEventListener(t, function (ev) { ev.preventDefault(); drop.classList.add('over'); }); });
+  document.addEventListener('dragleave', function (ev) { if (!ev.relatedTarget) drop.classList.remove('over'); });
+  document.addEventListener('drop', function (ev) {
+    ev.preventDefault(); drop.classList.remove('over');
+    var f = ev.dataTransfer && ev.dataTransfer.files && ev.dataTransfer.files[0];
+    if (f && (/^image\//.test(f.type) || f.type === 'application/pdf')) handlePhoto(f, false);
+  });
+  var origSetReceipt = setReceipt;
+  setReceipt = function (scanTxt, photoTxt) {
+    origSetReceipt(scanTxt, photoTxt);
+    var t = photoTxt || scanTxt;
+    $('dDrop').classList.toggle('done', !!t && t.charAt(0) === '✓');
+    $('dDrop').innerHTML = t ? esc(t) + ' · <a id="dAttach2">change</a>' : '📎 Drop a receipt here, paste a screenshot, or <a id="dAttach2">choose a file</a>';
+    $('dAttach2').onclick = attach;
+  };
+  renderDBud(); loadToday();
+  setTimeout(function () { $('dEvent').focus(); }, 50);
+}
+function fillPaid() {
+  var cur = $('dPaid').value || D.user.card || D.cards[0];
+  var opts = D.cards.map(function (c) { return '<option value="' + esc(c) + '">Card ' + esc(c) + '</option>'; })
+    .concat(METHODS.map(function (m) { return '<option value="' + esc(m) + '">' + esc(m) + '</option>'; }));
+  $('dPaid').innerHTML = opts.join('') + '<option value="__other">Other…</option>';
+  $('dPaid').value = cur; if ($('dPaid').value !== cur) $('dPaid').value = D.user.card || D.cards[0];
+}
+function renderDRet() {
+  $('dRet').classList.toggle('on', dRetOn); $('dRet').textContent = dRetOn ? '↩ Return ✓' : '↩ Return';
+  $('dAmount').parentNode.classList.toggle('ret', dRetOn);
+  $('dSave').textContent = dRetOn ? 'Save return' : 'Save';
+  renderDBud();
+}
+// the always-visible budget line under the row
+function renderDBud() {
+  var e = findEvent($('dEvent').value);
+  if (!e) { $('dBud').innerHTML = $('dEvent').value.trim() ? 'Pick an event from the list.' : 'Pick an event to see its budget.'; return; }
+  var amt = (parseFloat($('dAmount').value) || 0) * (dRetOn ? -1 : 1);
+  if (!e.budget) { $('dBud').innerHTML = '<b>' + esc(e.name) + '</b>: no budget set · ' + money(e.spent) + ' spent so far'; return; }
+  var left = e.budget - e.spent, after = left - amt, pct = Math.min(100, Math.max(0, (e.spent + amt) / e.budget * 100));
+  var col = after < 0 ? 'var(--red)' : pct >= 90 ? 'var(--amber)' : 'var(--blue)';
+  $('dBud').innerHTML = '<b>' + esc(e.name) + '</b>: <b>' + (left >= 0 ? money(left) + ' left' : money(-left) + ' over') + '</b> of ' + money0(e.budget) +
+    (amt ? ' &nbsp;→&nbsp; after this: <b style="color:' + col + '">' + (after >= 0 ? money(after) + ' left' : money(-after) + ' over budget') + '</b>' : '') +
+    '<div class="bar"><div style="width:' + pct + '%;height:6px;background:' + col + '"></div></div>';
+}
+function deskSave() {
+  var e = findEvent($('dEvent').value);
+  $('dErr').textContent = '';
+  if (!e) { $('dErr').textContent = 'Pick an event from the list.'; $('dEvent').focus(); return; }
+  var paid = $('dPaid').classList.contains('hide') ? $('dPaidOther').value.trim() : $('dPaid').value;
+  if (!paid || paid === '__other') { $('dErr').textContent = 'Fill in what it was paid with.'; return; }
+  if (/^[\s*xX•-]*\d{3,}$/.test(paid)) paid = paid.replace(/\D/g, '').slice(-4);
+  // hand the line to the same save the phone uses (instant save + sending in the background)
+  S.event = e.name; S.isReturn = dRetOn; S.other = true; S.store = null; S.card = paid;
+  S.date = $('dDate').value || daysAgo(0);
+  $('amount').value = $('dAmount').value; $('otherStore').value = $('dStore').value.trim(); $('starOther').checked = false;
+  $('item').value = $('dItem').value; $('orderNo').value = D.user.admin ? $('dOrder').value.trim() : '';
+  var before = lastSaved;
+  $('saveBtn').click();
+  if (lastSaved === before) { $('dErr').textContent = $('err').textContent || 'Check the line and try again.'; }
+}
+function deskReset() {
+  ['dEvent', 'dAmount', 'dStore', 'dItem', 'dOrder', 'dPaidOther'].forEach(function (id) { $(id).value = ''; });
+  $('dPaid').classList.remove('hide'); $('dPaidOther').classList.add('hide'); fillPaid(); $('dPaid').value = D.user.card || D.cards[0];
+  $('dDate').value = daysAgo(0); dRetOn = false; renderDRet(); $('dErr').textContent = '';
+  renderDBud(); $('dEvent').focus();
+}
+window.deskAfterSave = function () { if (!DESK) return; deskReset(); renderToday(); };
+var todayTimer = null;
+window.deskAfterSend = function () { if (!DESK) return; clearTimeout(todayTimer); todayTimer = setTimeout(loadToday, 600); };
+
+// today's list under the line: what reached the sheet, plus anything still sending
+var todayItems = [];
+function loadToday() {
+  if (!DESK || !D) return;
+  google.script.run.withSuccessHandler(function (r) {
+    var start = new Date(); start.setHours(0, 0, 0, 0);
+    var end = start.getTime() + 864e5;   // only today (a typo like 11/26 isn't "today")
+    todayItems = (r.items || []).filter(function (it) { return it.when >= start.getTime() && it.when < end; });
+    renderToday();
+  }).withFailureHandler(function (e) {
+    $('dToday').innerHTML = '<div class="hint">' + (e.offline ? 'No connection. Today\'s list will show when you\'re back online.' : esc(e.message)) + '</div>';
+  }).getEntries();
+}
+function renderToday() {
+  qAll().then(function (queued) {
+    var rows = queued.map(function (x) {
+      return { q: true, item: x.p.item, store: x.p.store, event: x.p.event, orderNo: x.p.orderNo, card: x.p.card, amount: x.amount, who: D.user.name, status: x.status };
+    }).concat(todayItems);
+    var total = rows.reduce(function (s, x) { return s + (Number(x.amount) || 0); }, 0);
+    $('dTodaySum').textContent = '· ' + rows.length + ' logged · ' + money(total);
+    if (!rows.length) { $('dToday').innerHTML = '<div class="hint">Nothing logged yet today.</div>'; return; }
+    var admin = D.user.admin;
+    $('dToday').innerHTML = '<table class="dt"><tr>' + (admin ? '<th>Who</th>' : '') + '<th>Event</th><th>Store</th><th>What for</th>' + (admin ? '<th>Order #</th>' : '') +
+      '<th>Paid with</th><th class="num">Amount</th><th></th></tr>' + rows.map(function (x, i) {
+        var act = x.q ? '<span class="hint">' + (x.status === 'error' ? '⚠ not saved' : 'Sending…') + '</span>'
+                      : '<a data-ed="' + i + '">Edit</a><a data-del="' + i + '">Delete</a>';
+        return '<tr>' + (admin ? '<td>' + esc(x.who) + '</td>' : '') + '<td>' + esc(x.event) + '</td><td>' + esc(x.store) + '</td><td>' + esc(x.item) + '</td>' +
+          (admin ? '<td class="hint">' + esc(x.orderNo || '') + '</td>' : '') + '<td>' + esc(payLabel(x.card)) + '</td>' +
+          '<td class="num' + (x.amount < 0 ? ' neg' : '') + '">' + money(x.amount) + '</td><td class="num">' + act + '</td></tr>';
+      }).join('') + '</table>';
+    $('dToday').querySelectorAll('[data-ed]').forEach(function (a) { a.onclick = function () { openEdit(rows[Number(a.dataset.ed)]); }; });
+    $('dToday').querySelectorAll('[data-del]').forEach(function (a) {
+      a.onclick = function () {
+        if (!a.classList.contains('sure')) { a.classList.add('sure'); a.textContent = 'Sure? Delete'; return; }
+        var it = rows[Number(a.dataset.del)]; a.textContent = 'Deleting…';
+        google.script.run.withSuccessHandler(function () {
+          var e = eventByName(it.event); if (e) { e.spent = Math.round((e.spent - it.amount) * 100) / 100; writeCache(D); }
+          showToast('Entry deleted.', false); renderDBud(); loadToday();
+        }).withFailureHandler(function (err) { a.classList.remove('sure'); a.textContent = 'Delete'; showToast('Couldn\'t delete: ' + err.message, false); })
+          .deleteEntry(it.row, it.fp);
+      };
+    });
+  });
+}
+
+if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
+  navigator.serviceWorker.register('sw.js').catch(function () {});
+}
+
+function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+</script>
+</body>
+</html>
